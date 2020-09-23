@@ -457,6 +457,7 @@ async function fetchMatches(startIndex, endIndex) {
             };
             const response = await fetch('/match', options);
             const data = await response.json();
+            console.log(data);
             await fetchMatchesInfo(data);
         }
         loadingMatches.style.display = 'none';
@@ -505,11 +506,13 @@ function displayMatchesInfo(matchData, playerData) {
     const matchOutcome = document.createElement('div');
     const killParticipation = document.createElement('div');
     const patch = document.createElement('p');
+    const matchDate = document.createElement('div');
     match.className = 'match';
     build.className = 'build';
     spells.className = 'spells';
     runes.className = 'runes';
-
+    console.log(matchData);
+    console.log(playerData);
     for (let i in CHAMPIONS_DATA) {
         if (CHAMPIONS_DATA[i].key == playerData.championId) {
             summonerName.innerHTML = CHAMPIONS_DATA[i].name;
@@ -520,6 +523,39 @@ function displayMatchesInfo(matchData, playerData) {
             goldEarned.innerHTML = `Gold: ${(playerData.stats.goldEarned/1000).toFixed(1)}k`;
             championPlayed.src = `https://ddragon.leagueoflegends.com/cdn/${CURRENT_VERSION}/img/champion/${CHAMPIONS_DATA[i].id}.png`;
             championPlayed.alt = CHAMPIONS_DATA[i].name;
+
+
+            // let matchDuration = 973 * 1000;
+            // console.log(matchDuration)
+            // let timestamp = Number(1600820981769 + matchDuration);
+            // // const timestamp = 1600820981769;
+            // let DATE = new Date(timestamp);
+            // console.log(DATE);
+
+            const getMatchDate = (matchCreation, matchDuration) => {
+                let date = document.createElement('p');
+                const intervals = [
+                    { label: 'year', seconds: 31536000 },
+                    { label: 'month', seconds: 2592000 },
+                    { label: 'day', seconds: 86400 },
+                    { label: 'hour', seconds: 3600 },
+                    { label: 'minute', seconds: 60 },
+                    { label: 'second', seconds: 0 }
+                ];
+                let matchTimestamp = matchCreation + (matchDuration * 1000);
+                let currentTimestamp = Date.now();
+                let differenceInSeconds = Math.floor((currentTimestamp - matchTimestamp) / 1000);
+                const interval = intervals.find(interval => interval.seconds < differenceInSeconds);
+                console.log(differenceInSeconds);
+                console.log(interval);
+                const number = Math.floor(differenceInSeconds / interval.seconds);
+                console.log(number);
+                let labelGrammar = number !== 1 ? 's' : '';
+                date.innerHTML = `${number} ${interval.label}${labelGrammar} ago.`;
+                console.log(`${number} ${interval.label}${labelGrammar} ago.`)
+                return date;
+            };
+            matchDate.appendChild(getMatchDate(matchData.gameCreation, matchData.gameDuration));
 
             let MATCH_MINUTES;
             let MATCH_SECONDS;
@@ -679,6 +715,7 @@ function displayMatchesInfo(matchData, playerData) {
 
         }
     }
+    match.appendChild(matchDate);
     match.appendChild(summonerName);
     match.appendChild(summonerScore);
     match.appendChild(summonerKDA);

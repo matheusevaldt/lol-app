@@ -187,7 +187,7 @@ header h2 {
 
 .summoner-info {
     position: relative;
-    display: none;
+    /* display: none; */
     margin-top: 5px;
 }
 
@@ -381,11 +381,11 @@ header h2 {
     width: 48px;
 }
 
-.match {
+/* .match {
     margin-top: 50px;
     border-bottom: 1px solid #000;
     border-top: 1px solid #000;
-}
+} */
 
 .loading-matches {
     display: none;
@@ -394,5 +394,4 @@ header h2 {
 .match-history {
     padding-bottom: 100px;
     border-bottom: 1px solid blue;
-    background-color: rgb(180, 180, 180);
 }
