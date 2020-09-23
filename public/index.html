@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOL App</title>
+    <link href="styles.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Ranchers&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <script defer src="script.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>League of Legends App</h1>
+        <h2>We provide information for all summoners in every region.</h2>
+    </header>
+
+    <div class="search-show-summoner">
+        <div class="loading-summoner"></div>
+        <form class="form-summoner">
+            <!-- <input type="text" class="input-summoner" placeholder="Summoner's name"> -->
+            <!-- <input type="text" class="input-summoner" value="Tobi The Cat" placeholder="Summoner's name"> -->
+            <input type="text" class="input-summoner" value="Tetovisky" placeholder="Summoner's name">
+            <select class="region-summoner" id="region">
+                <option value="br1" selected>Brazil</option>
+                <option value="eun1">Europe Nordic & East</option>
+                <option value="euw1">Europe West</option>
+                <option value="na1" >North America</option>
+                <option value="kr">South Korea</option>
+                <option value="jp1">Japan</option>
+                <option value="la1">Latin America North</option>
+                <option value="la2">Latin America South</option>
+                <option value="oc1">Oceania</option>
+                <option value="tr1">Russia</option>
+                <option value="ru">Turkey</option>
+              </select>
+              <input type="submit" class="button-submit-summoner" value="Search">
+        </form>
+        <div class="summary">
+            <div class="summoner-summary">
+                <div class="summary-icon-level">
+                    <img class="summoner-icon" src="https://ddragon.leagueoflegends.com/cdn/10.19.1/img/profileicon/26.png">
+                    <p class="summoner-level">30</p>
+                </div>
+                <div class="summary-name-server">
+                    <p class="summoner-name">Tetovisky</p>
+                    <p class="summoner-server">Brazil #1</p>
+                </div>
+            </div>
+            <button class="button-return-to-search-summoner"><img src="images/return-to-search.png"></button>
+        </div>
+    </div>
+
+    <main class="summoner-info">
+
+        <div class="loading-summoner-info"></div>
+
+        <div class="buttons">
+            <button class="button-ranked">Ranked</button>
+            <button class="button-champion-mastery">Masteries</button>
+            <button class="button-match-history">Match History</button>
+        </div>
+
+        <div class="ranked">
+            <div class="ranked-solo">
+                <div class="ranked-solo-emblem">
+                    <img src="images/ranked-emblems/Emblem_Platinum.png">
+                </div>
+                <div class="ranked-solo-info">
+                    <p class="ranked-solo-elo">Platinum I &#128900; Ranked Solo</p>
+                    <p class="ranked-solo-league-points-win-rate">14 LP &#128900; 109 W - 77 L &#128900; 59.5%</p>
+                </div>
+            </div>
+            <div class="ranked-flex">
+                <div class="ranked-flex-emblem">
+                    <img src="images/ranked-emblems/Emblem_Diamond.png">
+                </div>
+                <div class="ranked-flex-info">
+                    <p class="ranked-flex-elo">Diamond I &#128900; Ranked Flex</p>
+                    <p class="ranked-flex-league-points-win-rate">55 LP &#128900; 32 W - 25 L &#128900; 66.1%</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="champion-mastery"></div>
+        
+        <div class="match-history">
+            <p class="loading-matches">LOADING</p>
+            <h1>Matches</h1>
+            <button class="button-load-more-matches">More matches</button>
+        </div>
+    </main>
+</body>
+</html>
+
+
+
+<!-- <div class="champion">
+                <div class="champion-mastery-rank"><span class="asd">#</span>1</div>
+                <div class="champion-image">
+                    <img src="images/Malphite.png">
+                </div>
+                <div class="champion-name-title">
+                    <p class="champion-name">Malphite</p>
+                    <p class="champion-title">Shard of the Monolith</p>
+                </div>
+                <div class="champion-mastery-points">
+                    <img src="images/mastery-flairs/mastery-level-4.png" alt="Mastery level 4">
+                    <p class="champion-points">4,675</p>
+                </div>
+            </div>
+            <div class="champion">
+                <div class="champion-mastery-rank"><span class="asd">#</span>2</div>
+                <div class="champion-image">
+                    <img src="images/Malphite.png">
+                </div>
+                <div class="champion-name-title">
+                    <p class="champion-name">Olaf</p>
+                    <p class="champion-title">The Berseker</p>
+                </div>
+                <div class="champion-mastery-points">
+                    <img src="images/mastery-flairs/mastery-level-4.png" alt="Mastery level 4">
+                    <p class="champion-points">3,675</p>
+                </div>
+            </div> -->
