@@ -356,6 +356,78 @@ header h2 {
 
 
 
+.match {
+    width: 90%;
+    border: 2px solid #1a1644;
+    margin: 15px auto;
+    padding: 5px 5px;
+    border-radius: 5px;
+}
+
+.match-header {
+    /* border: 1px solid red; */
+    font-size: 0.85em;
+    padding-bottom: 6px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.match-date-duration {
+    display: flex;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.match-duration {
+    position: relative;
+    top: 1px;
+}
+
+.match-info {
+    border: 1px solid #fff;
+    display: flex;
+    align-items: center;
+}
+
+.match-champion {
+    background-color: yellow;
+}
+
+.match-champion img {
+    width: 64px;
+    border-radius: 50%;
+    border: 3px solid red;
+}
+
+.match-spells {
+    border: 2px solid blue;
+    display: flex;
+    flex-direction: column;
+}
+
+.match-runes {
+    border: 2px solid green;
+    display: flex;
+    flex-direction: column;
+}
+
+.match-spells img,
+.match-runes img {
+    width: 30px;
+}
+
+.match-kda {
+    background-color: yellow;
+    color: black;
+}
+
+.match-level-cs-kp {
+    background-color: blue;
+}
+
+
+
+
 
 
 
