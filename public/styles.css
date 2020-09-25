@@ -362,6 +362,8 @@ header h2 {
     margin: 15px auto;
     padding: 5px 5px;
     border-radius: 5px;
+    /* background-image: linear-gradient(to right, rgba(26, 160, 97, 0.4), rgba(26, 160, 97, 0.3), rgba(26, 160, 97, 0.2)); */
+    /* background-image: linear-gradient(to right, rgba(160, 26, 55, 0.4), rgba(160, 26, 55, 0.3), rgba(160, 26, 55, 0.2)); */
 }
 
 .match-header {
@@ -384,45 +386,91 @@ header h2 {
 }
 
 .match-info {
-    border: 1px solid #fff;
+    /* border: 1px solid #fff; */
     display: flex;
     align-items: center;
 }
 
 .match-champion {
-    background-color: yellow;
+    margin-right: 8px;
 }
 
 .match-champion img {
     width: 64px;
     border-radius: 50%;
-    border: 3px solid red;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4);
 }
 
 .match-spells {
-    border: 2px solid blue;
     display: flex;
     flex-direction: column;
+    margin-right: 5px;
+}
+
+.match-spells img {
+    width: 24px;
+    border-radius: 5px;
+}
+
+.match-spells img:first-of-type {
+    margin-bottom: 3px;
 }
 
 .match-runes {
-    border: 2px solid green;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    margin-right: 10px;
+    height: 59px;
 }
 
-.match-spells img,
-.match-runes img {
-    width: 30px;
+.match-runes img:first-of-type {
+    margin: 2px 0 3px 0;
+    width: 28px;
 }
 
-.match-kda {
-    background-color: yellow;
-    color: black;
+.match-runes img:last-of-type {
+    width: 20px;
+}
+
+.match-score-kda {
+    font-size: 0.9em;
+    font-weight: 700;
+    margin-right: 12px;
 }
 
 .match-level-cs-kp {
-    background-color: blue;
+    flex: 1;
+    font-size: 0.9em;
+}
+
+.match-info-span {
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 400;
+}
+
+.match-footer {
+    display: flex;
+    justify-content: space-between;
+    margin: 6px 0 4px 0;
+    padding: 6px 2px 0 2px;
+    border-top: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.button-match-show-more {
+    position: relative;
+    top: 2.5px;
+    border: none;
+    background-color: transparent;
+    padding: 0 8px;
+}
+
+.button-match-show-more img {
+    width: 14px;
+}
+
+.match-patch {
+    font-size: 0.85em;
 }
 
 
@@ -435,35 +483,27 @@ header h2 {
 
 
 
-
-
-.build {
-    border: 1px solid red;
+.match-history {
+    border: 1px solid;
+    position: relative;
 }
-
-.build img {
-    width: 32px;
-}
-
-.spells img {
-    width: 32px;
-}
-
-.runes img {
-    width: 48px;
-}
-
-/* .match {
-    margin-top: 50px;
-    border-bottom: 1px solid #000;
-    border-top: 1px solid #000;
-} */
 
 .loading-matches {
     display: none;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    border: 5px solid #20195a;
+    border-radius: 50%;
+    border-top: 5px solid #4f2799;
+    width: 30px;
+    height: 30px;
+    animation: spin-loading-matches 1.2s linear infinite;
 }
 
-.match-history {
-    padding-bottom: 100px;
-    border-bottom: 1px solid blue;
+@keyframes spin-loading-matches {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

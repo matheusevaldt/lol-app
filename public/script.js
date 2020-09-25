@@ -498,9 +498,24 @@ function displayMatchesInfo(matchData, playerData) {
     const divInfo = document.createElement('div');
     const divFooter = document.createElement('div');
     const matchDateAndDuration = document.createElement('div');
+    const summonerChampion = document.createElement('div');
+    const summonerChampionImage = document.createElement('img');
+    const summonerSpells = document.createElement('div');
+    const summonerRunes = document.createElement('div');
+    const summonerScoreAndKDA = document.createElement('div');
+    const summonerLevelCSAndKP = document.createElement('div');
+    const buttonShowMore = document.createElement('button');
     div.className = 'match';
     divHeader.className = 'match-header';
+    divInfo.className = 'match-info';
+    divFooter.className = 'match-footer';
     matchDateAndDuration.className = 'match-date-duration';
+    summonerChampion.className = 'match-champion';
+    summonerSpells.className = 'match-spells';
+    summonerRunes.className = 'match-runes';
+    summonerScoreAndKDA.className = 'match-score-kda';
+    summonerLevelCSAndKP.className = 'match-level-cs-kp';
+    buttonShowMore.className = 'button-match-show-more';
 
     for (let i in CHAMPIONS_DATA) {
         if (CHAMPIONS_DATA[i].key == playerData.championId) {
@@ -512,17 +527,20 @@ function displayMatchesInfo(matchData, playerData) {
                         if (matchDurationInSeconds < 270 && team.inhibitorKills == '0') {
                             console.log('REMAKE');
                             div.style.backgroundImage = 'linear-gradient(to right, #8a8a8a, #8a8a8a, #d6d6d6)';
+                            // summonerChampionImage.style.border = '3px solid ';
                             return;
                         }
                         const winnerTeam = team.teamId;
                         if (winnerTeam == playerResult) {
                             console.log(`Winner team: ${winnerTeam} - Player team: ${playerResult}`);
-                            // div.style.backgroundImage = 'linear-gradient(to right, #3e978b, #2ec1ac)';
-                            div.style.backgroundImage = 'linear-gradient(to right, #056674, rgba(5, 102, 116, 0.4))';
+                            // div.style.backgroundImage = 'linear-gradient(to right, #056674, rgba(5, 102, 116, 0.4))';
+                            div.style.backgroundImage = 'linear-gradient(to right, rgba(26, 160, 97, 0.4), rgba(26, 160, 97, 0.3), rgba(26, 160, 97, 0.2))';
+                            summonerChampionImage.style.border = '3px solid rgba(26, 160, 97, 0.8)';
                         } else {
                             console.log(`Winner team: ${winnerTeam} - Player team: ${playerResult}`);
-                            // div.style.backgroundImage = 'linear-gradient(to right, #ff414d, #f56a79)';
-                            div.style.backgroundImage = 'linear-gradient(to right, #ff414d, rgb(255, 65, 77, 0.7))';
+                            // div.style.backgroundImage = 'linear-gradient(to right, #ff414d, rgb(255, 65, 77, 0.7))';
+                            div.style.backgroundImage = 'linear-gradient(to right, rgba(160, 26, 55, 0.4), rgba(160, 26, 55, 0.3), rgba(160, 26, 55, 0.2))';
+                            summonerChampionImage.style.border = '3px solid rgba(160, 26, 55, 0.8)';
                         }
                     }
                 });
@@ -585,12 +603,146 @@ function displayMatchesInfo(matchData, playerData) {
 
             matchDateAndDuration.appendChild(getMatchDuration(matchData.gameDuration));
 
+            // Getting summoner's champion
+            summonerChampionImage.src = `https://ddragon.leagueoflegends.com/cdn/${CURRENT_VERSION}/img/champion/${CHAMPIONS_DATA[i].id}.png`;
+            summonerChampionImage.alt = CHAMPIONS_DATA[i].name;
+            summonerChampion.appendChild(summonerChampionImage);
+
+            // Getting summoner's spells
+            const getSummonerSpells = () => {
+                const spellsPlayed = [
+                    {spell1: playerData.spell1Id},
+                    {spell2: playerData.spell2Id}
+                ];
+                spellsPlayed.map(spell => {
+                    const spellId = Number(Object.values(spell));
+                    for (let i in SPELLS_DATA) {
+                        if (SPELLS_DATA[i].key == spellId) {
+                            const spellImage = document.createElement('img');
+                            spellImage.src = `https://ddragon.leagueoflegends.com/cdn/${CURRENT_VERSION}/img/spell/${SPELLS_DATA[i].id}.png`;
+                            spellImage.alt = SPELLS_DATA[i].name;
+                            summonerSpells.appendChild(spellImage);
+                        }
+                    }
+                });
+            };
+            
+            getSummonerSpells();
+
+            // Getting summoner's runes (primary keystone and secondary rune)
+            const getSummonerRunes = (primaryKeystone, secondaryRune) => {
+                RUNES_DATA.map(tree => {
+                    tree.slots.map(rune => {
+                        rune.runes.map(keystone => {
+                            if (keystone.id == primaryKeystone) {
+                                const primaryKeystone = document.createElement('img');
+                                primaryKeystone.src = `https://ddragon.leagueoflegends.com/cdn/img/${keystone.icon}`;
+                                primaryKeystone.alt = keystone.name;
+                                summonerRunes.appendChild(primaryKeystone);
+                            }
+                        });
+                    });
+                });
+                RUNES_DATA.map(tree => {
+                    if (tree.id == secondaryRune) {
+                        const secondaryRune = document.createElement('img');
+                        secondaryRune.src = `https://ddragon.leagueoflegends.com/cdn/img/${tree.icon}`;
+                        secondaryRune.alt = tree.name;
+                        summonerRunes.appendChild(secondaryRune);
+                    }
+                });
+            };
+            
+            getSummonerRunes(playerData.stats.perk0, playerData.stats.perkSubStyle);
+
+            // Getting summoner's score and KDA
+            const getSummonerScoreAndKDA = (kills, deaths, assists) => {
+                const summonerScore = document.createElement('p');
+                const summonerKDA = document.createElement('p');
+                summonerScore.innerHTML = `${kills} <span class="match-info-span">/</span> ${deaths} <span class="match-info-span">/</span> ${assists}`;
+                summonerKDA.innerHTML = `${((kills + assists) / deaths).toFixed(1)} <span class="match-info-span">KDA</span>`;
+                summonerScoreAndKDA.appendChild(summonerScore);
+                summonerScoreAndKDA.appendChild(summonerKDA);
+            };
+
+            getSummonerScoreAndKDA(playerData.stats.kills, playerData.stats.deaths, playerData.stats.assists);
+
+            // Getting summoner's level
+            const getSummonerLevel = level => {
+                const summonerLevel = document.createElement('p');
+                summonerLevel.innerHTML = `Level <strong>${level}<strong>`;
+                summonerLevelCSAndKP.appendChild(summonerLevel);
+            };
+
+            getSummonerLevel(playerData.stats.champLevel);
+
+            // Getting summoner's creep score and creep score per minute
+            const getSummonerCreepScore = (totalCreepScore) => {
+                const summonerCreepScore = document.createElement('p');
+                let matchDuration = parseFloat(`${MATCH_MINUTES}.${MATCH_SECONDS}`);
+                let rawCreepScorePerMinute = `${totalCreepScore / matchDuration}`;
+                let creepScorePerMinuteFixed = rawCreepScorePerMinute.slice(0, rawCreepScorePerMinute.indexOf('.') + 2);
+                if (creepScorePerMinuteFixed.charAt(creepScorePerMinuteFixed.length - 1) === '0') {
+                    creepScorePerMinuteFixed = creepScorePerMinuteFixed.slice(0, creepScorePerMinuteFixed.length - 2);
+                }
+                summonerCreepScore.innerHTML = `${totalCreepScore} (${creepScorePerMinuteFixed}) <span class="match-info-span">CS</span>`;
+                summonerLevelCSAndKP.appendChild(summonerCreepScore);
+            };
+
+            getSummonerCreepScore(playerData.stats.totalMinionsKilled);
+
+            // Getting summoner's kill participation
+            const getSummonerKillParticipation = (allSummonersInTheMatch, summonerOutcome) => {
+                const summonerKillParticipation = document.createElement('p');
+                const sumSummonerKillsAndAssists = playerData.stats.kills + playerData.stats.assists;
+                let summonerTeamTotalKills = 0;
+                allSummonersInTheMatch.map(summoner => {
+                    const allSummonersData = Object.entries(summoner);
+                    allSummonersData.forEach(index => {
+                        const dataDescription = index[0];
+                        const dataValue = index[1];
+                        if (dataDescription === 'stats') {
+                            if (dataValue.win === summonerOutcome) {
+                                summonerTeamTotalKills += dataValue.kills;
+                                summonerKillParticipation.innerHTML = `<strong>${Math.round((sumSummonerKillsAndAssists / summonerTeamTotalKills) * 100)}%</strong> <span class="match-info-span">KP</span>`;
+                            }
+                        }
+                    });
+                });
+                summonerLevelCSAndKP.appendChild(summonerKillParticipation);
+            };
+
+            getSummonerKillParticipation(matchData.participants, playerData.stats.win);
+
+            // Adding the 'show more' button to the footer
+            buttonShowMore.innerHTML = '<img src="images/expand-button.png">';
+            divFooter.appendChild(buttonShowMore);
+
+            // Getting match's patch
+            const getMatchPatch = patchDescription => {
+                const matchPatch = document.createElement('p');
+                matchPatch.className = 'match-patch';
+                const season = patchDescription.split('.').slice(0, 1);
+                const patch = patchDescription.split('.').slice(1, 2);
+                matchPatch.innerHTML = `<span class="match-info-span">Played on patch</span> <strong>${season}.${patch}</strong>`;
+                divFooter.appendChild(matchPatch);
+            };
+
+            getMatchPatch(matchData.gameVersion);
+
 
         }
     }
 
     divHeader.appendChild(matchDateAndDuration);
+    divInfo.appendChild(summonerChampion);
+    divInfo.appendChild(summonerSpells);
+    divInfo.appendChild(summonerRunes);
+    divInfo.appendChild(summonerScoreAndKDA);
+    divInfo.appendChild(summonerLevelCSAndKP);
     div.appendChild(divHeader);
+    div.appendChild(divInfo);
+    div.appendChild(divFooter);
     arrayMatches.push(div);
 
 
