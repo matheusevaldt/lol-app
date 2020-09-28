@@ -466,6 +466,10 @@ header h2 {
 }
 
 .button-match-show-more img {
+    pointer-events: none;
+}
+
+.button-match-show-more img {
     width: 14px;
 }
 
@@ -473,8 +477,104 @@ header h2 {
     font-size: 0.85em;
 }
 
+.match-more-info {
+    /* border: 1px solid; */
+    /* display: flex; */
+    display: none;
+    margin: 10px 0 12px 0;
+}
 
+.match-more-info-display {
+    display: flex;
+}
 
+/* .match-more-info-hide {
+    display: none;
+} */
+
+.match-items {
+    /* border: 1px solid red; */
+    display: grid;
+    grid-template-areas: "item0 item1 item2 ."
+                         "item3 item4 item5 item6";
+    margin-right: 12px;
+}
+
+.item-build {
+    width: 30px;
+    height: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+}
+
+.item-build img {
+    width: 100%;
+    border-radius: 5px;
+}
+
+.item-build:nth-child(1) {
+    grid-area: item0;
+    margin-right: 4px;
+    margin-bottom: 4px;
+}
+
+.item-build:nth-child(2) {
+    grid-area: item1;
+    margin-right: 4px;
+    margin-bottom: 4px;
+}
+
+.item-build:nth-child(3) {
+    grid-area: item2;
+    margin-bottom: 4px;
+}
+
+.item-build:nth-child(4) {
+    grid-area: item3;
+}
+
+.item-build:nth-child(5) {
+    grid-area: item4;
+}
+
+.item-build:nth-child(6) {
+    grid-area: item5;
+}
+
+.item-build:nth-child(7) {
+    grid-area: item6;
+    position: relative;
+    top: -16px;
+    margin-left: 4px;
+}
+
+.match-champions {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.match-blue-team {
+    /* border: 1px solid red; */
+    display: flex;
+}
+
+.match-blue-team img,
+.match-red-team img {
+    width: 27px;
+    margin-right: 3px;
+}
+
+.match-blue-team img:last-of-type,
+.match-red-team img:last-of-type {
+    margin-right: 0;
+}
+
+.match-red-team {
+    display: flex;
+}
 
 
 

@@ -497,6 +497,7 @@ function displayMatchesInfo(matchData, playerData) {
     const divHeader = document.createElement('div');
     const divInfo = document.createElement('div');
     const divFooter = document.createElement('div');
+    const divMoreInfo = document.createElement('div');
     const matchDateAndDuration = document.createElement('div');
     const summonerChampion = document.createElement('div');
     const summonerChampionImage = document.createElement('img');
@@ -505,10 +506,15 @@ function displayMatchesInfo(matchData, playerData) {
     const summonerScoreAndKDA = document.createElement('div');
     const summonerLevelCSAndKP = document.createElement('div');
     const buttonShowMore = document.createElement('button');
+    const summonerItems = document.createElement('div');
+    const summonersChampions = document.createElement('div');
     div.className = 'match';
+    div.id = matchData.gameId;
     divHeader.className = 'match-header';
     divInfo.className = 'match-info';
     divFooter.className = 'match-footer';
+    divMoreInfo.className = 'match-more-info';
+    divMoreInfo.id = matchData.gameId;
     matchDateAndDuration.className = 'match-date-duration';
     summonerChampion.className = 'match-champion';
     summonerSpells.className = 'match-spells';
@@ -516,6 +522,8 @@ function displayMatchesInfo(matchData, playerData) {
     summonerScoreAndKDA.className = 'match-score-kda';
     summonerLevelCSAndKP.className = 'match-level-cs-kp';
     buttonShowMore.className = 'button-match-show-more';
+    summonerItems.className = 'match-items';
+    summonersChampions.className = 'match-champions';
 
     for (let i in CHAMPIONS_DATA) {
         if (CHAMPIONS_DATA[i].key == playerData.championId) {
@@ -730,6 +738,60 @@ function displayMatchesInfo(matchData, playerData) {
 
             getMatchPatch(matchData.gameVersion);
 
+            // Getting summoner's items
+            const getSummonerItems = () => {
+                const items = [
+                    {item0: playerData.stats.item0},
+                    {item1: playerData.stats.item1},
+                    {item2: playerData.stats.item2},
+                    {item3: playerData.stats.item3},
+                    {item4: playerData.stats.item4},
+                    {item5: playerData.stats.item5},
+                    {item6: playerData.stats.item6}
+                ];
+                items.map(item => {
+                    const divImage = document.createElement('div');
+                    const itemImage = document.createElement('img');
+                    divImage.className = 'item-build';
+                    const itemId = Object.values(item);
+                    if (itemId != '0') {
+                        itemImage.src = `https://ddragon.leagueoflegends.com/cdn/${CURRENT_VERSION}/img/item/${itemId}.png`;
+                        divImage.appendChild(itemImage);
+                    }
+                    summonerItems.appendChild(divImage);
+                });
+            };
+            
+            getSummonerItems();
+
+            // Getting summoners' champions
+            const getSummonersChampions = summoners => {
+                const blueTeam = document.createElement('div');
+                const redTeam = document.createElement('div');
+                blueTeam.className = 'match-blue-team';
+                redTeam.className = 'match-red-team';
+                summoners.map(summoner => {
+                    for (let i in CHAMPIONS_DATA) {
+                        const championImage = document.createElement('img');
+                        const championName = CHAMPIONS_DATA[i].id;
+                        if (CHAMPIONS_DATA[i].key == summoner.championId) {
+                            if (summoner.teamId === 100) {
+                                championImage.src = `https://ddragon.leagueoflegends.com/cdn/${CURRENT_VERSION}/img/champion/${championName}.png`;
+                                championImage.alt = championName;
+                                blueTeam.appendChild(championImage);
+                            } else {
+                                championImage.src = `https://ddragon.leagueoflegends.com/cdn/${CURRENT_VERSION}/img/champion/${championName}.png`;
+                                championImage.alt = championName;
+                                redTeam.appendChild(championImage);
+                            }
+                        }
+                    }
+                });
+                summonersChampions.appendChild(blueTeam);
+                summonersChampions.appendChild(redTeam);
+            };
+
+            getSummonersChampions(matchData.participants);
 
         }
     }
@@ -740,268 +802,36 @@ function displayMatchesInfo(matchData, playerData) {
     divInfo.appendChild(summonerRunes);
     divInfo.appendChild(summonerScoreAndKDA);
     divInfo.appendChild(summonerLevelCSAndKP);
+    divMoreInfo.appendChild(summonerItems);
+    divMoreInfo.appendChild(summonersChampions);
     div.appendChild(divHeader);
     div.appendChild(divInfo);
+    div.appendChild(divMoreInfo);
     div.appendChild(divFooter);
     arrayMatches.push(div);
 
-
-
-    // const match = document.createElement('div');
-    // const matchDuration = document.createElement('div');
-    // const build = document.createElement('div');
-    // const spells = document.createElement('div');
-    // const runes = document.createElement('div');
-    // const mapAndGameMode = document.createElement('div');
-    // const summonerName = document.createElement('p');
-    // const summonerScore = document.createElement('p');
-    // const summonerKDA = document.createElement('p');
-    // const summonerLevel = document.createElement('p');
-    // const creepScore = document.createElement('p');
-    // const creepScorePerMinute = document.createElement('div');
-    // const goldEarned = document.createElement('p');
-    // const championPlayed = document.createElement('img');
-    // const matchOutcome = document.createElement('div');
-    // const killParticipation = document.createElement('div');
-    // const patch = document.createElement('p');
-    // const matchDate = document.createElement('div');
-    // match.className = 'match';
-    // build.className = 'build';
-    // spells.className = 'spells';
-    // runes.className = 'runes';
-    // console.log(matchData);
-    // console.log(playerData);
-    // for (let i in CHAMPIONS_DATA) {
-    //     if (CHAMPIONS_DATA[i].key == playerData.championId) {
-    //         summonerName.innerHTML = CHAMPIONS_DATA[i].name;
-    //         summonerScore.innerHTML = `Kills: ${playerData.stats.kills}. Deaths: ${playerData.stats.deaths}. Assists: ${playerData.stats.assists}.`;
-    //         summonerKDA.innerHTML = `KDA: ${((playerData.stats.kills + playerData.stats.assists) / playerData.stats.deaths).toFixed(1)}`;
-    //         summonerLevel.innerHTML = `Level: ${playerData.stats.champLevel}`;
-    //         creepScore.innerHTML = `CS: ${playerData.stats.totalMinionsKilled}`;
-    //         goldEarned.innerHTML = `Gold: ${(playerData.stats.goldEarned/1000).toFixed(1)}k`;
-    //         championPlayed.src = `https://ddragon.leagueoflegends.com/cdn/${CURRENT_VERSION}/img/champion/${CHAMPIONS_DATA[i].id}.png`;
-    //         championPlayed.alt = CHAMPIONS_DATA[i].name;
-
-
-    //         // let matchDuration = 973 * 1000;
-    //         // console.log(matchDuration)
-    //         // let timestamp = Number(1600820981769 + matchDuration);
-    //         // // const timestamp = 1600820981769;
-    //         // let DATE = new Date(timestamp);
-    //         // console.log(DATE);
-
-    //         const getMatchDate = (matchCreation, matchDuration) => {
-    //             let date = document.createElement('p');
-    //             const intervals = [
-    //                 { label: 'year', seconds: 31536000 },
-    //                 { label: 'month', seconds: 2592000 },
-    //                 { label: 'day', seconds: 86400 },
-    //                 { label: 'hour', seconds: 3600 },
-    //                 { label: 'minute', seconds: 60 },
-    //                 { label: 'second', seconds: 0 }
-    //             ];
-    //             let matchTimestamp = matchCreation + (matchDuration * 1000);
-    //             let currentTimestamp = Date.now();
-    //             let differenceInSeconds = Math.floor((currentTimestamp - matchTimestamp) / 1000);
-    //             const interval = intervals.find(interval => interval.seconds < differenceInSeconds);
-    //             console.log(differenceInSeconds);
-    //             console.log(interval);
-    //             const number = Math.floor(differenceInSeconds / interval.seconds);
-    //             console.log(number);
-    //             let labelGrammar = number !== 1 ? 's' : '';
-    //             date.innerHTML = `${number} ${interval.label}${labelGrammar} ago.`;
-    //             console.log(`${number} ${interval.label}${labelGrammar} ago.`)
-    //             return date;
-    //         };
-    //         matchDate.appendChild(getMatchDate(matchData.gameCreation, matchData.gameDuration));
-
-    //         let MATCH_MINUTES;
-    //         let MATCH_SECONDS;
-
-    //         const getMatchDuration = matchDurationInSeconds => {
-    //             let duration = document.createElement('p');
-    //             let minutes = Math.floor(matchDurationInSeconds / 60);
-    //             let seconds = matchDurationInSeconds - minutes * 60;
-    //             let minutesFixed = minutes < 10 ? `0${minutes}` : minutes;
-    //             let secondsFixed = seconds < 10 ? `0${seconds}` : seconds;
-    //             duration.innerHTML = `Match duration: ${minutesFixed}:${secondsFixed}`;
-    //             MATCH_MINUTES = minutesFixed;
-    //             MATCH_SECONDS = secondsFixed;
-    //             return duration;
-    //         };
-    //         matchDuration.appendChild(getMatchDuration(matchData.gameDuration));
-            
-    //         const getCreepScorePerMinute = (minionsKilled, matchMinutes, matchSeconds) => {
-    //             let data = document.createElement('p');
-    //             let matchDuration = parseFloat(`${matchMinutes}.${matchSeconds}`);
-    //             let calculation = `${minionsKilled / matchDuration}`;
-    //             data.innerHTML = `CS per minute: ${calculation.slice(0, calculation.indexOf('.') + 2)}`;
-    //             return data;
-    //         };
-    //         creepScorePerMinute.appendChild(getCreepScorePerMinute(playerData.stats.totalMinionsKilled, MATCH_MINUTES, MATCH_SECONDS));
-
-    //         const playerKillsAndAssists = playerData.stats.kills + playerData.stats.assists;
-    //         const getKillParticipation = (players, playerTeam, playerKillsAndAssists) => {
-    //             let teamTotalKills = 0;
-    //             let data = document.createElement('p');
-    //             players.map(player => {
-    //                 const playerStats = Object.entries(player);
-    //                 playerStats.forEach(index => {
-    //                     const key = index[0];
-    //                     const value = index[1];
-    //                     if (key === 'stats') {
-    //                         if (value.win === playerTeam) {
-    //                             teamTotalKills += value.kills;
-    //                             data.innerHTML = `Kill participation: ${Math.round((playerKillsAndAssists / teamTotalKills) * 100)}%`;
-    //                         }
-    //                     }
-    //                 });
-    //             });
-    //             return data;
-    //         };
-    //         killParticipation.appendChild(getKillParticipation(matchData.participants, playerData.stats.win, playerKillsAndAssists));
-
-    //         const getMatchOutcome = (teams, playerResult, matchDurationInSeconds) => {
-    //             let data = document.createElement('p');
-    //             teams.map(team => {
-    //                 if (team.win === 'Win') {
-    //                     if (matchDurationInSeconds < 270 && team.inhibitorKills == '0') {
-    //                         data.innerHTML = 'Remake';
-    //                         matchOutcome.style.backgroundColor = '#8a8a8a';
-    //                         return;
-    //                     }
-    //                     const winnerTeam = team.teamId;
-    //                     if (winnerTeam == playerResult) {
-    //                         console.log('-------------');
-    //                         console.log(`Winner team: ${winnerTeam} - Player team: ${playerResult}`);
-    //                         console.log('PLAYER HAS WON THE GAME.');
-    //                         matchOutcome.style.backgroundColor = '#1cb329';
-    //                         data.innerHTML = 'Victory';
-    //                     } else {
-    //                         console.log('-------------');
-    //                         console.log(`Winner team: ${winnerTeam} - Player team: ${playerResult}`);
-    //                         console.log('PLAYER HAS LOST THE GAME');
-    //                         matchOutcome.style.backgroundColor = '#cf1821';
-    //                         data.innerHTML = 'Defeat';
-    //                     }
-    //                 }
-    //             });
-    //             return data;
-    //         };
-    //         matchOutcome.appendChild(getMatchOutcome(matchData.teams, playerData.teamId, matchData.gameDuration));
-
-    //         const getPatchMatchWasPlayed = patchDescription => {
-    //             let patchMatchOccured = document.createElement('p');
-    //             const season = patchDescription.split('.').slice(0, 1);
-    //             const patch = patchDescription.split('.').slice(1, 2);
-    //             patchMatchOccured.innerHTML = `Played on patch ${season}.${patch}`;
-    //             return patchMatchOccured;
-    //         };
-    //         patch.appendChild(getPatchMatchWasPlayed(matchData.gameVersion));
-
-    //         QUEUE_DATA.map(queue => {
-            //     if (queue.queueId == matchData.queueId) {
-            //         console.log('aaa')
-            //         const map = document.createElement('p');
-            //         const description = document.createElement('p');
-            //         map.innerHTML = queue.map;
-            //         const rawDescription = queue.description;
-            //         const wordsToBeRemoved = ['5v5', 'games'];
-            //         let descriptionFixed = rawDescription;
-            //         wordsToBeRemoved.map(word => {
-            //             descriptionFixed = descriptionFixed.replace(word, '');
-            //         });
-            //         description.innerHTML = descriptionFixed;
-            //         mapAndGameMode.appendChild(map);
-            //         mapAndGameMode.appendChild(description);                    
-            //     }
-            // });
-
-    //         const buildItems = [
-    //             {item0: playerData.stats.item0},
-    //             {item1: playerData.stats.item1},
-    //             {item2: playerData.stats.item2},
-    //             {item3: playerData.stats.item3},
-    //             {item4: playerData.stats.item4},
-    //             {item5: playerData.stats.item5},
-    //             {item6: playerData.stats.item6}
-    //         ];
-    //         buildItems.map(item => {
-    //             const itemID = Object.values(item);
-    //             const itemImage = document.createElement('img');
-    //             if (itemID != '0') {
-    //                 itemImage.src = `https://ddragon.leagueoflegends.com/cdn/${CURRENT_VERSION}/img/item/${itemID}.png`;
-    //             }
-    //             build.appendChild(itemImage);
-    //         });
-
-    //         const summonerSpells = [
-    //             {spell1: playerData.spell1Id},
-    //             {spell2: playerData.spell2Id}
-    //         ];
-    //         summonerSpells.map(spell => {
-    //             const spellID = Number(Object.values(spell));
-    //             for (let i in SPELLS_DATA) {
-    //                 if (SPELLS_DATA[i].key == spellID) {
-    //                     const spellImage = document.createElement('img');
-    //                     spellImage.src = `https://ddragon.leagueoflegends.com/cdn/${CURRENT_VERSION}/img/spell/${SPELLS_DATA[i].id}.png`;
-    //                     spellImage.alt = SPELLS_DATA[i].name;
-    //                     spells.appendChild(spellImage);
-    //                 }
-    //             }
-    //         });
-
-    //         RUNES_DATA.map(tree => {
-    //             tree.slots.map(rune => {
-    //                 rune.runes.map(keystone => {
-    //                     if (keystone.id == playerData.stats.perk0) {
-    //                         const primaryKeystoneImage = document.createElement('img');
-    //                         primaryKeystoneImage.src = `https://ddragon.leagueoflegends.com/cdn/img/${keystone.icon}`;
-    //                         primaryKeystoneImage.alt = keystone.name;
-    //                         runes.appendChild(primaryKeystoneImage);
-    //                     }
-    //                 });
-    //             });
-    //         });
-    //         RUNES_DATA.map(tree => {
-    //             if (tree.id == playerData.stats.perkSubStyle) {
-    //                 const secondaryRune = document.createElement('img');
-    //                 secondaryRune.src = `https://ddragon.leagueoflegends.com/cdn/img/${tree.icon}`
-    //                 secondaryRune.alt = tree.name;
-    //                 runes.appendChild(secondaryRune);
-    //             }
-    //         });
-
-    //     }
-    // }
-    // match.appendChild(matchDate);
-    // match.appendChild(summonerName);
-    // match.appendChild(summonerScore);
-    // match.appendChild(summonerKDA);
-    // match.appendChild(killParticipation);
-    // match.appendChild(summonerLevel);
-    // match.appendChild(matchDuration);
-    // match.appendChild(matchOutcome);
-    // match.appendChild(creepScore);
-    // match.appendChild(creepScorePerMinute);
-    // match.appendChild(goldEarned);
-    // match.appendChild(championPlayed);
-    // match.appendChild(mapAndGameMode);
-    // match.appendChild(build);
-    // match.appendChild(spells);
-    // match.appendChild(runes);
-    // match.appendChild(patch);
-    // arrayMatches.push(match);
+    // goldEarned.innerHTML = `Gold: ${(playerData.stats.goldEarned/1000).toFixed(1)}k`;
+    
 }
 
+window.addEventListener('click', event => {
+    const element = event.target;
+    if (element.classList == 'button-match-show-more') {
+        const matchContainer = element.parentElement.parentElement;
+        const matchId = element.parentElement.parentElement.id;
+        const divs = matchContainer.getElementsByTagName('div');
+        const divMoreInfo = divs[8];
+        const divMoreInfoId = divMoreInfo.id;
+        console.log(matchId);
+        console.log(divMoreInfoId);
+        if (matchId == divMoreInfoId) {
+            // divMoreInfo.classList.toggle('match-more-info-hide');
+            divMoreInfo.classList.toggle('match-more-info-display');
+            
+        }
+    }
+});
 
-// WHEN GAME WAS PLAYED
-// match played 1 hour ago
-// match played 19 hours ago
-// match played 1 day ago
-// match played 17 days ago
-// match played one month ago
-// match played three months ago
 
 
 // ROLE PLAYER WAS PLAYING
