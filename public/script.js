@@ -53,6 +53,7 @@ function returnToSearchSummoner() {
     resetButtonsBackgroundColor();
     ranked.style.display = 'none';
     championMastery.style.display = 'none';
+    matchHistory.style.display = 'none';
     formSummoner.style.display = 'grid';
 }
 
@@ -192,6 +193,7 @@ function resetButtonsBackgroundColor() {
 function resetSummonerInfo() {
     ranked.style.display = 'none';
     championMastery.style.display = 'none';
+    matchHistory.style.display = 'none';
 }
 
 async function fetchRankedData() {
@@ -400,20 +402,29 @@ function resetChampionMastery() {
 
 
 
-
-
-
 let MATCH_HISTORY = [];
 let MATCHES_CURRENT_START_INDEX = 0;
 let MATCHES_CURRENT_END_INDEX = 5;
-
+// const matches = document.querySelector('.matches')
+const moreMatches = document.querySelector('.more-matches');
+const loadingMoreMatches = document.querySelector('.loading-more-matches');
 const buttonLoadMoreMatches = document.querySelector('.button-load-more-matches');
 buttonLoadMoreMatches.addEventListener('click', () => {
+    buttonLoadMoreMatches.style.display = 'none';
+    moreMatches.classList.add('more-matches-loading');
+    loadingMoreMatches.style.display = 'block';
     fetchMatches(MATCHES_CURRENT_START_INDEX, MATCHES_CURRENT_END_INDEX);
 });
 
 async function fetchMatchHistory() {
     try {
+        resetButtonsBackgroundColor();
+        resetSummonerInfo();
+        resetMatchHistory();
+        MATCH_HISTORY = [];
+        MATCHES_CURRENT_START_INDEX = 0;
+        MATCHES_CURRENT_END_INDEX = 5;
+        buttonMatchHistory.style.backgroundColor = 'rgba(93, 84, 164, 0.5)';
         const options = {
             method: 'POST',
             headers: {
@@ -437,12 +448,15 @@ async function fetchMatchHistory() {
 
 async function fetchMatches(startIndex, endIndex) {
     try {
+        matchHistory.style.display = 'block';
         let MATCHES_ID = [];
         let MATCHES_ID_ORDER = [];
         let lastFiveMatches = MATCH_HISTORY.slice(startIndex, endIndex);
         lastFiveMatches.map(match => MATCHES_ID.push(match.gameId));
         MATCHES_ID_ORDER = MATCHES_ID.sort();
-        loadingMatches.style.display = 'block';
+        if (MATCHES_CURRENT_START_INDEX === 0) {
+            loadingMatches.style.display = 'block';
+        }
         for (let i = 0; i < MATCHES_ID_ORDER.length; i++) {
             console.log(MATCHES_ID_ORDER[i]);
             const options = {
@@ -471,6 +485,12 @@ async function fetchMatches(startIndex, endIndex) {
         }
         MATCHES_CURRENT_START_INDEX += 5;
         MATCHES_CURRENT_END_INDEX += 5;
+        // Adjusting the 'Show more' button in the bottom of the match history
+        matchHistory.insertAdjacentElement('beforeend', moreMatches);
+        moreMatches.style.display = 'grid';
+        moreMatches.classList.remove('more-matches-loading');
+        loadingMoreMatches.style.display = 'none';
+        buttonLoadMoreMatches.style.display = 'block';
     } catch (err) {
         console.log('Error in function: fetchMatches');
         console.error(err);
@@ -505,7 +525,7 @@ function displayMatchesInfo(matchData, playerData) {
     const summonerRunes = document.createElement('div');
     const summonerScoreAndKDA = document.createElement('div');
     const summonerLevelCSAndKP = document.createElement('div');
-    const buttonShowMore = document.createElement('button');
+    const buttonExpandInfo = document.createElement('button');
     const summonerItems = document.createElement('div');
     const summonersChampions = document.createElement('div');
     div.className = 'match';
@@ -521,7 +541,7 @@ function displayMatchesInfo(matchData, playerData) {
     summonerRunes.className = 'match-runes';
     summonerScoreAndKDA.className = 'match-score-kda';
     summonerLevelCSAndKP.className = 'match-level-cs-kp';
-    buttonShowMore.className = 'button-match-show-more';
+    buttonExpandInfo.className = 'button-expand-info';
     summonerItems.className = 'match-items';
     summonersChampions.className = 'match-champions';
 
@@ -723,8 +743,8 @@ function displayMatchesInfo(matchData, playerData) {
             getSummonerKillParticipation(matchData.participants, playerData.stats.win);
 
             // Adding the 'show more' button to the footer
-            buttonShowMore.innerHTML = '<img src="images/expand-button.png">';
-            divFooter.appendChild(buttonShowMore);
+            buttonExpandInfo.innerHTML = `<img src="images/expand-button.png" id="${matchData.gameId}"class="button-expand-info-image">`;
+            divFooter.appendChild(buttonExpandInfo);
 
             // Getting match's patch
             const getMatchPatch = patchDescription => {
@@ -816,21 +836,47 @@ function displayMatchesInfo(matchData, playerData) {
 
 window.addEventListener('click', event => {
     const element = event.target;
-    if (element.classList == 'button-match-show-more') {
+    if (element.classList == 'button-expand-info') {
         const matchContainer = element.parentElement.parentElement;
-        const matchId = element.parentElement.parentElement.id;
-        const divs = matchContainer.getElementsByTagName('div');
-        const divMoreInfo = divs[8];
+        const matchContainerId = element.parentElement.parentElement.id;
+        const divsInsideMatchContainer = matchContainer.getElementsByTagName('div');
+        const divMoreInfo = divsInsideMatchContainer[8];
         const divMoreInfoId = divMoreInfo.id;
-        console.log(matchId);
-        console.log(divMoreInfoId);
-        if (matchId == divMoreInfoId) {
-            // divMoreInfo.classList.toggle('match-more-info-hide');
-            divMoreInfo.classList.toggle('match-more-info-display');
-            
+        const imageInsideExpandButton = document.querySelectorAll('.button-expand-info-image');
+        const arrayImagesInsideExpandButton = [...imageInsideExpandButton];
+        if (matchContainerId == divMoreInfoId) {
+            if (divMoreInfo.style.maxHeight) {
+                divMoreInfo.style.maxHeight = null;
+                divMoreInfo.classList.remove('match-more-info-expand');
+                arrayImagesInsideExpandButton.forEach(image => {
+                    if (image.id == matchContainerId) {
+                        image.classList.remove('button-expand-info-image-flip');
+                    }
+                });
+            } else {
+                divMoreInfo.style.maxHeight = `${divMoreInfo.scrollHeight}px`;
+                divMoreInfo.classList.add('match-more-info-expand');
+                arrayImagesInsideExpandButton.forEach(image => {
+                    if (image.id == matchContainerId) {
+                        image.classList.add('button-expand-info-image-flip');
+                    }
+                });
+            }
         }
     }
 });
+
+function resetMatchHistory() {
+    const matches = document.querySelectorAll('.match');
+    const arrayMatches = [...matches];
+    arrayMatches.forEach(match => match.remove());
+
+    moreMatches.style.display = 'none';
+    moreMatches.classList.remove('more-matches-loading');
+    loadingMoreMatches.style.display = 'none';
+    buttonLoadMoreMatches.style.display = 'block';
+}
+
 
 
 
