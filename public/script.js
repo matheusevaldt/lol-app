@@ -28,7 +28,7 @@ const buttonChampionMastery = document.querySelector('.button-champion-mastery')
 const buttonMatchHistory = document.querySelector('.button-match-history');
 
 const matchHistory = document.querySelector('.match-history');
-const loadingMatches = document.querySelector('.loading-matches');
+// const loadingMatches = document.querySelector('.loading-matches');
 
 buttonSubmitSummoner.addEventListener('click', event => event.preventDefault());
 buttonSubmitSummoner.addEventListener('click', fetchSummonerData);
@@ -294,14 +294,27 @@ function getRankedEmblem(id, where) {
     return where.innerHTML = emblems[id] || emblems.default;
 }
 
+
+// CHAMPION MASTERY
 let arrayChampionMastery = [];
+let MASTERIES_START_INDEX, MASTERIES_END_INDEX;
+let CHAMPION_MASTERY_RANK;
+let CHAMPION_MASTERY;
+const moreMasteries = document.querySelector('.more-masteries');
+const loadingMoreMasteries = document.querySelector('.loading-more-masteries');
+const buttonLoadMoreMasteries = document.querySelector('.button-load-more-masteries');
 
 async function fetchChampionMastery() {
     try {
         resetButtonsBackgroundColor();
         resetSummonerInfo();
+        resetChampionMastery();
         buttonChampionMastery.style.backgroundColor = 'rgba(93, 84, 164, 0.5)';
         setTimeout(() => loadingSummonerInfo.style.display = 'block', 100);
+        MASTERIES_START_INDEX = 0;
+        MASTERIES_END_INDEX = 5;
+        CHAMPION_MASTERY_RANK = 1;
+        CHAMPION_MASTERY = [];
         const options = {
             method: 'POST',
             headers: {
@@ -316,21 +329,34 @@ async function fetchChampionMastery() {
         const data = await response.json();
         console.log('CHAMPION MASTERY:');
         console.log(data);
-        await displayChampionMastery(data);
-        loadingSummonerInfo.style.display = 'none';
-        championMastery.style.display = 'block';
-        arrayChampionMastery.forEach(mastery => championMastery.insertAdjacentElement('beforeend', mastery));
-        arrayChampionMastery = [];
+        CHAMPION_MASTERY = data;
+        await displayChampionMastery(CHAMPION_MASTERY, MASTERIES_START_INDEX, MASTERIES_END_INDEX);
+        adjustChampionMasteryAfterDisplay();
     } catch (err) {
         console.log('Error in function: fetchChampionMastery');
         console.error(err);
     }
 }
 
-async function displayChampionMastery(data) {
-    resetChampionMastery();
-    let CHAMPION_MASTERY_RANK = 1;
-    const mostPlayedChampions = data.slice(0, 5);
+function adjustChampionMasteryAfterDisplay() {
+    console.log('ADJUST');
+    // After all the masteries have been fetched, display in on the champion mastery
+    loadingSummonerInfo.style.display = 'none';
+    championMastery.style.display = 'block';
+    arrayChampionMastery.forEach(mastery => championMastery.insertAdjacentElement('beforeend', mastery));
+    arrayChampionMastery = [];
+    MASTERIES_START_INDEX += 5;
+    MASTERIES_END_INDEX += 5;
+    // Adjusting the 'Show more' button in the bottom of the masteries
+    championMastery.insertAdjacentElement('beforeend', moreMasteries);
+    moreMasteries.style.display = 'grid';
+    moreMasteries.classList.remove('more-masteries-loading');
+    loadingMoreMasteries.style.display = 'none';
+    buttonLoadMoreMasteries.style.display = 'block';
+}
+
+async function displayChampionMastery(data, startIndex, endIndex) {
+    const mostPlayedChampions = data.slice(startIndex, endIndex);
     mostPlayedChampions.forEach(champion => {
         const championID = champion.championId;
         for (let i in CHAMPIONS_DATA) {
@@ -374,7 +400,7 @@ async function displayChampionMastery(data) {
                 div.appendChild(divChampionMasteryAndPoints);
                 console.log(div);
                 arrayChampionMastery.push(div);
-                // championMastery.appendChild(div);
+                console.log('one more');
             }
         }
     });
@@ -395,16 +421,27 @@ function getMasteryFlair(id, where) {
 }
 
 function resetChampionMastery() {
-    while (championMastery.firstChild) {
-        championMastery.removeChild(championMastery.firstChild);
-    }
+    const champions = document.querySelectorAll('.champion');
+    const arrayChampions = [...champions];
+    arrayChampions.forEach(champion => champion.remove());
 }
 
+buttonLoadMoreMasteries.addEventListener('click', async () => {
+    buttonLoadMoreMasteries.style.display = 'none';
+    moreMasteries.classList.add('more-masteries-loading');
+    loadingMoreMasteries.style.display = 'block';
+    // setTimeout(() => await displayChampionMastery(CHAMPION_MASTERY, MASTERIES_START_INDEX, MASTERIES_END_INDEX), 100);
+    await displayChampionMastery(CHAMPION_MASTERY, MASTERIES_START_INDEX, MASTERIES_END_INDEX);
+    setTimeout(() => adjustChampionMasteryAfterDisplay(), 700);
+    // adjustChampionMasteryAfterDisplay();
+});
 
+
+// MATCH HISTORY
 
 let MATCH_HISTORY = [];
-let MATCHES_CURRENT_START_INDEX = 0;
-let MATCHES_CURRENT_END_INDEX = 5;
+let MATCHES_START_INDEX = 0;
+let MATCHES_END_INDEX = 5;
 // const matches = document.querySelector('.matches')
 const moreMatches = document.querySelector('.more-matches');
 const loadingMoreMatches = document.querySelector('.loading-more-matches');
@@ -413,7 +450,7 @@ buttonLoadMoreMatches.addEventListener('click', () => {
     buttonLoadMoreMatches.style.display = 'none';
     moreMatches.classList.add('more-matches-loading');
     loadingMoreMatches.style.display = 'block';
-    fetchMatches(MATCHES_CURRENT_START_INDEX, MATCHES_CURRENT_END_INDEX);
+    fetchMatches(MATCHES_START_INDEX, MATCHES_END_INDEX);
 });
 
 async function fetchMatchHistory() {
@@ -422,9 +459,10 @@ async function fetchMatchHistory() {
         resetSummonerInfo();
         resetMatchHistory();
         MATCH_HISTORY = [];
-        MATCHES_CURRENT_START_INDEX = 0;
-        MATCHES_CURRENT_END_INDEX = 5;
+        MATCHES_START_INDEX = 0;
+        MATCHES_END_INDEX = 5;
         buttonMatchHistory.style.backgroundColor = 'rgba(93, 84, 164, 0.5)';
+        setTimeout(() => loadingSummonerInfo.style.display = 'block', 100);
         const options = {
             method: 'POST',
             headers: {
@@ -439,7 +477,7 @@ async function fetchMatchHistory() {
         const data = await response.json();
         MATCH_HISTORY = data.matches;
         console.log(MATCH_HISTORY);
-        await fetchMatches(MATCHES_CURRENT_START_INDEX, MATCHES_CURRENT_END_INDEX);
+        await fetchMatches(MATCHES_START_INDEX, MATCHES_END_INDEX);
     } catch (err) {
         console.log('Error in function: fetchMatchHistory');
         console.error(err);
@@ -451,12 +489,9 @@ async function fetchMatches(startIndex, endIndex) {
         matchHistory.style.display = 'block';
         let MATCHES_ID = [];
         let MATCHES_ID_ORDER = [];
-        let lastFiveMatches = MATCH_HISTORY.slice(startIndex, endIndex);
-        lastFiveMatches.map(match => MATCHES_ID.push(match.gameId));
+        let getMatches = MATCH_HISTORY.slice(startIndex, endIndex);
+        getMatches.map(match => MATCHES_ID.push(match.gameId));
         MATCHES_ID_ORDER = MATCHES_ID.sort();
-        if (MATCHES_CURRENT_START_INDEX === 0) {
-            loadingMatches.style.display = 'block';
-        }
         for (let i = 0; i < MATCHES_ID_ORDER.length; i++) {
             console.log(MATCHES_ID_ORDER[i]);
             const options = {
@@ -474,17 +509,13 @@ async function fetchMatches(startIndex, endIndex) {
             console.log(data);
             await fetchMatchesInfo(data);
         }
-        loadingMatches.style.display = 'none';
+        // After all matches have been fetched, display all of them in the match history
+        loadingSummonerInfo.style.display = 'none';
         arrayMatches.reverse();
-        if (startIndex === 0) {
-            arrayMatches.forEach(match => matchHistory.insertAdjacentElement('beforeend', match));
-            arrayMatches = [];
-        } else {
-            arrayMatches.forEach(match => matchHistory.insertAdjacentElement('beforeend', match));
-            arrayMatches = [];
-        }
-        MATCHES_CURRENT_START_INDEX += 5;
-        MATCHES_CURRENT_END_INDEX += 5;
+        arrayMatches.forEach(match => matchHistory.insertAdjacentElement('beforeend', match));
+        arrayMatches = [];
+        MATCHES_START_INDEX += 5;
+        MATCHES_END_INDEX += 5;
         // Adjusting the 'Show more' button in the bottom of the match history
         matchHistory.insertAdjacentElement('beforeend', moreMatches);
         moreMatches.style.display = 'grid';
@@ -554,19 +585,16 @@ function displayMatchesInfo(matchData, playerData) {
                     if (team.win === 'Win') {
                         if (matchDurationInSeconds < 270 && team.inhibitorKills == '0') {
                             console.log('REMAKE');
-                            div.style.backgroundImage = 'linear-gradient(to right, #8a8a8a, #8a8a8a, #d6d6d6)';
-                            // summonerChampionImage.style.border = '3px solid ';
+                            div.style.backgroundImage = 'linear-gradient(to right, #8a8a8a, #8a8a8a, #a1a1a1)';
                             return;
                         }
                         const winnerTeam = team.teamId;
                         if (winnerTeam == playerResult) {
                             console.log(`Winner team: ${winnerTeam} - Player team: ${playerResult}`);
-                            // div.style.backgroundImage = 'linear-gradient(to right, #056674, rgba(5, 102, 116, 0.4))';
                             div.style.backgroundImage = 'linear-gradient(to right, rgba(26, 160, 97, 0.4), rgba(26, 160, 97, 0.3), rgba(26, 160, 97, 0.2))';
                             summonerChampionImage.style.border = '3px solid rgba(26, 160, 97, 0.8)';
                         } else {
                             console.log(`Winner team: ${winnerTeam} - Player team: ${playerResult}`);
-                            // div.style.backgroundImage = 'linear-gradient(to right, #ff414d, rgb(255, 65, 77, 0.7))';
                             div.style.backgroundImage = 'linear-gradient(to right, rgba(160, 26, 55, 0.4), rgba(160, 26, 55, 0.3), rgba(160, 26, 55, 0.2))';
                             summonerChampionImage.style.border = '3px solid rgba(160, 26, 55, 0.8)';
                         }
@@ -592,7 +620,7 @@ function displayMatchesInfo(matchData, playerData) {
 
             // Getting match date.
             const getMatchDate = (matchCreation, matchDuration) => {
-                let matchDate = document.createElement('p');
+                const matchDate = document.createElement('p');
                 matchDate.className = 'match-date';
                 const intervals = [
                     { label: 'year', seconds: 31536000 },
@@ -609,15 +637,15 @@ function displayMatchesInfo(matchData, playerData) {
                 const number = Math.floor(differenceInSeconds / interval.seconds);
                 let labelGrammar = number !== 1 ? 's' : '';
                 matchDate.innerHTML = `${number} ${interval.label}${labelGrammar} ago<span style="padding: 0 4px">&#128900;</span>`;
-                return matchDate;
+                matchDateAndDuration.appendChild(matchDate);
             };
 
-            matchDateAndDuration.appendChild(getMatchDate(matchData.gameCreation, matchData.gameDuration));
+            getMatchDate(matchData.gameCreation, matchData.gameDuration);
 
             // Getting match duration
             let MATCH_MINUTES, MATCH_SECONDS;
             const getMatchDuration = matchDurationInSeconds => {
-                let matchDuration = document.createElement('p');
+                const matchDuration = document.createElement('p');
                 matchDuration.className = 'match-duration';
                 let minutes = Math.floor(matchDurationInSeconds / 60);
                 let seconds = matchDurationInSeconds - minutes * 60;
@@ -625,11 +653,11 @@ function displayMatchesInfo(matchData, playerData) {
                 let secondsFixed = seconds < 10 ? `0${seconds}` : seconds;
                 MATCH_MINUTES = minutesFixed;
                 MATCH_SECONDS = secondsFixed;
-                matchDuration.innerHTML = `${minutesFixed}:${secondsFixed}`;
-                return matchDuration;
+                matchDuration.innerHTML = `${MATCH_MINUTES}:${MATCH_SECONDS}`;
+                matchDateAndDuration.appendChild(matchDuration);
             };
 
-            matchDateAndDuration.appendChild(getMatchDuration(matchData.gameDuration));
+            getMatchDuration(matchData.gameDuration);
 
             // Getting summoner's champion
             summonerChampionImage.src = `https://ddragon.leagueoflegends.com/cdn/${CURRENT_VERSION}/img/champion/${CHAMPIONS_DATA[i].id}.png`;
@@ -639,8 +667,8 @@ function displayMatchesInfo(matchData, playerData) {
             // Getting summoner's spells
             const getSummonerSpells = () => {
                 const spellsPlayed = [
-                    {spell1: playerData.spell1Id},
-                    {spell2: playerData.spell2Id}
+                    { spell1: playerData.spell1Id },
+                    { spell2: playerData.spell2Id }
                 ];
                 spellsPlayed.map(spell => {
                     const spellId = Number(Object.values(spell));
@@ -688,7 +716,9 @@ function displayMatchesInfo(matchData, playerData) {
                 const summonerScore = document.createElement('p');
                 const summonerKDA = document.createElement('p');
                 summonerScore.innerHTML = `${kills} <span class="match-info-span">/</span> ${deaths} <span class="match-info-span">/</span> ${assists}`;
-                summonerKDA.innerHTML = `${((kills + assists) / deaths).toFixed(1)} <span class="match-info-span">KDA</span>`;
+                let kda = ((kills + assists) / deaths).toFixed(1);
+                if (isNaN(kda)) kda = 0;
+                summonerKDA.innerHTML = `${kda} <span class="match-info-span">KDA</span>`;
                 summonerScoreAndKDA.appendChild(summonerScore);
                 summonerScoreAndKDA.appendChild(summonerKDA);
             };
@@ -709,15 +739,21 @@ function displayMatchesInfo(matchData, playerData) {
                 const summonerCreepScore = document.createElement('p');
                 let matchDuration = parseFloat(`${MATCH_MINUTES}.${MATCH_SECONDS}`);
                 let rawCreepScorePerMinute = `${totalCreepScore / matchDuration}`;
-                let creepScorePerMinuteFixed = rawCreepScorePerMinute.slice(0, rawCreepScorePerMinute.indexOf('.') + 2);
-                if (creepScorePerMinuteFixed.charAt(creepScorePerMinuteFixed.length - 1) === '0') {
-                    creepScorePerMinuteFixed = creepScorePerMinuteFixed.slice(0, creepScorePerMinuteFixed.length - 2);
+                let creepScorePerMinuteFixed;
+                if (rawCreepScorePerMinute !== '0') {
+                    creepScorePerMinuteFixed = rawCreepScorePerMinute.slice(0, rawCreepScorePerMinute.indexOf('.') + 2);
+                    if (creepScorePerMinuteFixed.charAt(creepScorePerMinuteFixed.length - 1) === '0') {
+                        creepScorePerMinuteFixed = creepScorePerMinuteFixed.slice(0, creepScorePerMinuteFixed.length - 2);
+                    }
+                } else {
+                    creepScorePerMinuteFixed = 0;
                 }
                 summonerCreepScore.innerHTML = `${totalCreepScore} (${creepScorePerMinuteFixed}) <span class="match-info-span">CS</span>`;
                 summonerLevelCSAndKP.appendChild(summonerCreepScore);
             };
 
             getSummonerCreepScore(playerData.stats.totalMinionsKilled);
+            // getSummonerCreepScore(0);
 
             // Getting summoner's kill participation
             const getSummonerKillParticipation = (allSummonersInTheMatch, summonerOutcome) => {
@@ -732,18 +768,22 @@ function displayMatchesInfo(matchData, playerData) {
                         if (dataDescription === 'stats') {
                             if (dataValue.win === summonerOutcome) {
                                 summonerTeamTotalKills += dataValue.kills;
-                                summonerKillParticipation.innerHTML = `<strong>${Math.round((sumSummonerKillsAndAssists / summonerTeamTotalKills) * 100)}%</strong> <span class="match-info-span">KP</span>`;
                             }
                         }
                     });
                 });
+                let killParticipation = Math.round((sumSummonerKillsAndAssists / summonerTeamTotalKills) * 100);
+                console.log(killParticipation);
+                if (isNaN(killParticipation)) killParticipation = 0;
+                console.log(killParticipation);
+                summonerKillParticipation.innerHTML = `<strong>${killParticipation}%</strong> <span class="match-info-span">KP</span>`;
                 summonerLevelCSAndKP.appendChild(summonerKillParticipation);
             };
 
             getSummonerKillParticipation(matchData.participants, playerData.stats.win);
 
-            // Adding the 'show more' button to the footer
-            buttonExpandInfo.innerHTML = `<img src="images/expand-button.png" id="${matchData.gameId}"class="button-expand-info-image">`;
+            // Adding the 'show more' button to the match footer
+            buttonExpandInfo.innerHTML = `<img src="images/expand-button.png" id="${matchData.gameId}" class="button-expand-info-image">`;
             divFooter.appendChild(buttonExpandInfo);
 
             // Getting match's patch
@@ -761,13 +801,13 @@ function displayMatchesInfo(matchData, playerData) {
             // Getting summoner's items
             const getSummonerItems = () => {
                 const items = [
-                    {item0: playerData.stats.item0},
-                    {item1: playerData.stats.item1},
-                    {item2: playerData.stats.item2},
-                    {item3: playerData.stats.item3},
-                    {item4: playerData.stats.item4},
-                    {item5: playerData.stats.item5},
-                    {item6: playerData.stats.item6}
+                    { item0: playerData.stats.item0 },
+                    { item1: playerData.stats.item1 },
+                    { item2: playerData.stats.item2 },
+                    { item3: playerData.stats.item3 },
+                    { item4: playerData.stats.item4 },
+                    { item5: playerData.stats.item5 },
+                    { item6: playerData.stats.item6 }
                 ];
                 items.map(item => {
                     const divImage = document.createElement('div');
@@ -842,8 +882,8 @@ window.addEventListener('click', event => {
         const divsInsideMatchContainer = matchContainer.getElementsByTagName('div');
         const divMoreInfo = divsInsideMatchContainer[8];
         const divMoreInfoId = divMoreInfo.id;
-        const imageInsideExpandButton = document.querySelectorAll('.button-expand-info-image');
-        const arrayImagesInsideExpandButton = [...imageInsideExpandButton];
+        const imagesInsideExpandButton = document.querySelectorAll('.button-expand-info-image');
+        const arrayImagesInsideExpandButton = [...imagesInsideExpandButton];
         if (matchContainerId == divMoreInfoId) {
             if (divMoreInfo.style.maxHeight) {
                 divMoreInfo.style.maxHeight = null;
@@ -870,7 +910,6 @@ function resetMatchHistory() {
     const matches = document.querySelectorAll('.match');
     const arrayMatches = [...matches];
     arrayMatches.forEach(match => match.remove());
-
     moreMatches.style.display = 'none';
     moreMatches.classList.remove('more-matches-loading');
     loadingMoreMatches.style.display = 'none';

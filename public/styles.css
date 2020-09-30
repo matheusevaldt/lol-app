@@ -21,6 +21,7 @@ ul {
 
 body {
     background-color:#413c69;
+    /* background-image: linear-gradient(to right, #8a8a8a, #8a8a8a,  #a1a1a1); */
     color: #dddddd;
     font-family: 'Lato', sans-serif;
 }
@@ -279,6 +280,10 @@ header h2 {
     margin-top: 2px;
 }
 
+.champion-mastery {
+    display: none;
+}
+
 .champion {
     border: 2px solid #1a1644;
     display: grid;
@@ -305,16 +310,15 @@ header h2 {
 
 .champion-image {
     margin: auto;
+    /* border: 1px solid; */
 }
-
-/* .asd {font-size: 0.75em; position: relative; top: -1.2px; margin-right: 1px} */
 
 .champion-image img {
     width: 64px;
     border-radius: 50%;
-    /* border: 5px solid rgba(10, 6, 70, 0.7); */
     border: 4px solid rgba(14, 3, 46, 0.7);
     box-shadow: 0 0 5px #5d54a4;
+    margin-top: 3px;
 }
 
 .champion-name-title {
@@ -322,25 +326,24 @@ header h2 {
 }
 
 .champion-name {
-    font-size: 1.05em;
+    font-size: 1em;
     font-weight: 700;
     margin-bottom: 1px;
 }
 
 .champion-title {
     font-size: 0.85em;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .champion-mastery-points {
     margin: auto 0;
     text-align: center;
-    /* border: 1px solid; */
 }
 
 .champion-mastery-points img {
     width: 48px;
     position: relative;
-    /* bottom: -4px; */
 }
 
 .champion-points {
@@ -348,10 +351,52 @@ header h2 {
     top: -4px;
     font-size: 0.85em;
     font-weight: 700;
+    color: #dadada;
 }
 
+.more-masteries {
+    display: grid;
+    grid-template-areas: "show-more-masteries";
+    width: 90%;
+    height: 40px;
+    margin: 20px 5%;
+    text-align: center;
+}
 
+.more-masteries-loading {
+    grid-template-areas: "loading-more-masteries";
+}
 
+.loading-more-masteries {
+    grid-area: loading-more-masteries;
+    display: none;
+    left: 0;
+    right: 0;
+    margin: auto;
+    border: 4px solid #251c77;
+    border-top: 4px solid #5421b3;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    animation: spin-loading-more-masteries 1.2s linear infinite;
+}
+
+@keyframes spin-loading-more-masteries {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.button-load-more-masteries {
+    grid-area: show-more-masteries;
+    display: none;
+    text-align: center;
+    font-size: 0.85em;
+    font-weight: 700;
+    background-color: transparent;
+    color: #dbdbdb;
+    border: 1px solid  rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+}
 
 
 
@@ -586,26 +631,6 @@ header h2 {
     position: relative;
 }
 
-.loading-matches {
-    display: none;
-    position: absolute;
-    top: 25px;
-    left: 0;
-    right: 0;
-    margin: 0 auto;
-    border: 4px solid #251c77;
-    border-top: 4px solid #5421b3;
-    border-radius: 50%;
-    width: 28px;
-    height: 28px;
-    animation: spin-loading-matches 1.2s linear infinite;
-}
-
-@keyframes spin-loading-matches {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
 .more-matches {
     /* border: 1px solid; */
     display: none;
@@ -651,9 +676,4 @@ header h2 {
     color: #dbdbdb;
     border: 1px solid  rgba(255, 255, 255, 0.2);
     border-radius: 8px;
-}
-
-
-.matches {
-    border: 1px solid pink;
 }
