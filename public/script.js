@@ -4,6 +4,7 @@ const regionSummoner = document.querySelector('.region-summoner');
 
 let ACCOUNT_ID;
 let SUMMONER_ID;
+let SUMMONER_NAME;
 let CURRENT_VERSION;
 let CHAMPIONS_DATA;
 let SPELLS_DATA;
@@ -101,6 +102,7 @@ async function fetchSummonerData() {
         if (data === '404') return summary.innerHTML = 'PLAYER NOT FOUND';
         ACCOUNT_ID = data.accountId;
         SUMMONER_ID = data.id;
+        SUMMONER_NAME = data.name;
         await displaySummonerSummary(data, server);
         const championsData = await fetchChampionsData();
         const spellsData = await fetchSpellsData();
@@ -297,12 +299,11 @@ function getRankedEmblem(id, where) {
 
 // CHAMPION MASTERY
 let arrayChampionMastery = [];
-let MASTERIES_START_INDEX, MASTERIES_END_INDEX;
-let CHAMPION_MASTERY_RANK;
-let CHAMPION_MASTERY;
+let CHAMPION_MASTERY, CHAMPION_MASTERY_RANK, MASTERIES_START_INDEX, MASTERIES_END_INDEX;
 const moreMasteries = document.querySelector('.more-masteries');
 const loadingMoreMasteries = document.querySelector('.loading-more-masteries');
 const buttonLoadMoreMasteries = document.querySelector('.button-load-more-masteries');
+const noMoreMasteries = document.querySelector('.no-more-masteries');
 
 async function fetchChampionMastery() {
     try {
@@ -311,10 +312,6 @@ async function fetchChampionMastery() {
         resetChampionMastery();
         buttonChampionMastery.style.backgroundColor = 'rgba(93, 84, 164, 0.5)';
         setTimeout(() => loadingSummonerInfo.style.display = 'block', 100);
-        MASTERIES_START_INDEX = 0;
-        MASTERIES_END_INDEX = 5;
-        CHAMPION_MASTERY_RANK = 1;
-        CHAMPION_MASTERY = [];
         const options = {
             method: 'POST',
             headers: {
@@ -338,47 +335,41 @@ async function fetchChampionMastery() {
     }
 }
 
-function adjustChampionMasteryAfterDisplay() {
-    console.log('ADJUST');
-    // After all the masteries have been fetched, display in on the champion mastery
-    loadingSummonerInfo.style.display = 'none';
-    championMastery.style.display = 'block';
-    arrayChampionMastery.forEach(mastery => championMastery.insertAdjacentElement('beforeend', mastery));
-    arrayChampionMastery = [];
-    MASTERIES_START_INDEX += 5;
-    MASTERIES_END_INDEX += 5;
-    // Adjusting the 'Show more' button in the bottom of the masteries
-    championMastery.insertAdjacentElement('beforeend', moreMasteries);
-    moreMasteries.style.display = 'grid';
-    moreMasteries.classList.remove('more-masteries-loading');
-    loadingMoreMasteries.style.display = 'none';
-    buttonLoadMoreMasteries.style.display = 'block';
-}
-
 async function displayChampionMastery(data, startIndex, endIndex) {
-    const mostPlayedChampions = data.slice(startIndex, endIndex);
-    mostPlayedChampions.forEach(champion => {
-        const championID = champion.championId;
+    const summonerChampions = data.slice(startIndex, endIndex);
+    summonerChampions.forEach(champion => {
+        const championId = champion.championId;
         for (let i in CHAMPIONS_DATA) {
-            if (CHAMPIONS_DATA[i].key == championID) {
+            if (CHAMPIONS_DATA[i].key == championId) {
                 const div = document.createElement('div');
-                const divChampionMasteryRank = document.createElement('div');
+                const divChampionMasteryHeader = document.createElement('div');
+                const divChampionMasteryMain = document.createElement('div');
+                const divChampionMasteryFooter = document.createElement('div');
+
+                const championMasteryRank = document.createElement('p');
                 const divChampionImage = document.createElement('div');
-                const divChampionNameAndTitle = document.createElement('div');
-                const divChampionMasteryAndPoints = document.createElement('div');
                 const championImage = document.createElement('img');
+                const divChampionNameAndTitle = document.createElement('div');
                 const championName = document.createElement('p');
                 const championTitle = document.createElement('p');
+                const divChampionMasteryAndPoints = document.createElement('div'); 
                 const championPoints = document.createElement('p');
+                const championLastPlayed = document.createElement('p');
+
                 div.className = 'champion';
-                divChampionMasteryRank.className = 'champion-mastery-rank';
+                divChampionMasteryHeader.className = 'champion-mastery-header';
+                divChampionMasteryMain.className = 'champion-mastery-main';
+                divChampionMasteryFooter.className = 'champion-mastery-footer';
+                championMasteryRank.className = 'champion-mastery-rank';
                 divChampionImage.className = 'champion-image';
                 divChampionNameAndTitle.className = 'champion-name-title';
                 championName.className = 'champion-name';
                 championTitle.className = 'champion-title';
-                championPoints.className = 'champion-points';
                 divChampionMasteryAndPoints.className = 'champion-mastery-points';
-                divChampionMasteryRank.innerHTML = `<span style="font-size: 0.75em; position: relative; top: -1.2px; margin-right: 1px">#</span>${CHAMPION_MASTERY_RANK}`;
+                championPoints.className = 'champion-points';
+                championLastPlayed.className = 'champion-last-played';
+
+                championMasteryRank.innerHTML = `Rank #${CHAMPION_MASTERY_RANK}`;
                 CHAMPION_MASTERY_RANK++;
                 championImage.src = `https://ddragon.leagueoflegends.com/cdn/${CURRENT_VERSION}/img/champion/${CHAMPIONS_DATA[i].id}.png`;
                 championImage.alt = CHAMPIONS_DATA[i].name;
@@ -390,17 +381,27 @@ async function displayChampionMastery(data, startIndex, endIndex) {
                 championTitle.innerHTML = championTitleFixed;
                 getMasteryFlair(champion.championLevel, divChampionMasteryAndPoints);
                 championPoints.innerHTML = (champion.championPoints).toLocaleString('en-GB');
+                const lastPlayed = new Date(champion.lastPlayTime);
+                championLastPlayed.innerHTML = `Last played: ${lastPlayed.toLocaleDateString('en-GB')}`;
+
                 divChampionImage.appendChild(championImage);
                 divChampionNameAndTitle.appendChild(championName);
                 divChampionNameAndTitle.appendChild(championTitle);
                 divChampionMasteryAndPoints.appendChild(championPoints);
-                div.appendChild(divChampionMasteryRank);
-                div.appendChild(divChampionImage);
-                div.appendChild(divChampionNameAndTitle);
-                div.appendChild(divChampionMasteryAndPoints);
+
+                divChampionMasteryHeader.appendChild(championMasteryRank);
+                divChampionMasteryMain.appendChild(divChampionImage);
+                divChampionMasteryMain.appendChild(divChampionNameAndTitle);
+                divChampionMasteryMain.appendChild(divChampionMasteryAndPoints);
+                divChampionMasteryFooter.appendChild(championLastPlayed);
+
+                div.appendChild(divChampionMasteryHeader);
+                div.appendChild(divChampionMasteryMain);
+                div.appendChild(divChampionMasteryFooter);
+
                 console.log(div);
                 arrayChampionMastery.push(div);
-                console.log('one more');
+
             }
         }
     });
@@ -424,25 +425,49 @@ function resetChampionMastery() {
     const champions = document.querySelectorAll('.champion');
     const arrayChampions = [...champions];
     arrayChampions.forEach(champion => champion.remove());
+    MASTERIES_START_INDEX = 0;
+    MASTERIES_END_INDEX = 5;
+    CHAMPION_MASTERY_RANK = 1;
+    CHAMPION_MASTERY = [];
+    buttonLoadMoreMasteries.style.display = 'block';
+    loadingMoreMasteries.style.display = 'none';
+    noMoreMasteries.style.display = 'none';
+    moreMasteries.classList.remove('no-more-masteries-display');
 }
 
 buttonLoadMoreMasteries.addEventListener('click', async () => {
     buttonLoadMoreMasteries.style.display = 'none';
     moreMasteries.classList.add('more-masteries-loading');
     loadingMoreMasteries.style.display = 'block';
-    // setTimeout(() => await displayChampionMastery(CHAMPION_MASTERY, MASTERIES_START_INDEX, MASTERIES_END_INDEX), 100);
     await displayChampionMastery(CHAMPION_MASTERY, MASTERIES_START_INDEX, MASTERIES_END_INDEX);
     setTimeout(() => adjustChampionMasteryAfterDisplay(), 700);
-    // adjustChampionMasteryAfterDisplay();
 });
+
+function adjustChampionMasteryAfterDisplay() {
+    loadingSummonerInfo.style.display = 'none';
+    championMastery.style.display = 'block';
+    arrayChampionMastery.forEach(mastery => championMastery.insertAdjacentElement('beforeend', mastery));
+    arrayChampionMastery = [];
+    championMastery.insertAdjacentElement('beforeend', moreMasteries);
+    moreMasteries.style.display = 'grid';
+    moreMasteries.classList.remove('more-masteries-loading');
+    loadingMoreMasteries.style.display = 'none';
+    if (CHAMPION_MASTERY_RANK > CHAMPION_MASTERY.length) {
+        moreMasteries.classList.add('no-more-masteries-display');
+        noMoreMasteries.innerHTML = `<span style="color: #ffffff; font-weight: 700">${SUMMONER_NAME}</span> <span style="color: #cecece">doesn't have more masteries.</span>`;
+        noMoreMasteries.style.display = 'block';
+    } else {
+        MASTERIES_START_INDEX += 5;
+        MASTERIES_END_INDEX += 5;
+        buttonLoadMoreMasteries.style.display = 'block';
+    }
+}
 
 
 // MATCH HISTORY
-
 let MATCH_HISTORY = [];
 let MATCHES_START_INDEX = 0;
 let MATCHES_END_INDEX = 5;
-// const matches = document.querySelector('.matches')
 const moreMatches = document.querySelector('.more-matches');
 const loadingMoreMatches = document.querySelector('.loading-more-matches');
 const buttonLoadMoreMatches = document.querySelector('.button-load-more-matches');
@@ -491,7 +516,9 @@ async function fetchMatches(startIndex, endIndex) {
         let MATCHES_ID_ORDER = [];
         let getMatches = MATCH_HISTORY.slice(startIndex, endIndex);
         getMatches.map(match => MATCHES_ID.push(match.gameId));
+        console.log(MATCHES_ID);
         MATCHES_ID_ORDER = MATCHES_ID.sort();
+        console.log(MATCHES_ID_ORDER);
         for (let i = 0; i < MATCHES_ID_ORDER.length; i++) {
             console.log(MATCHES_ID_ORDER[i]);
             const options = {
