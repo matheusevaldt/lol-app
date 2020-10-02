@@ -12,6 +12,10 @@ let RUNES_DATA;
 let QUEUE_DATA;
 let arrayMatches = [];
 
+const notifyError = document.querySelector('.notify-error');
+const errorDescription = document.querySelector('.error-description');
+const buttons = document.querySelector('.buttons');
+
 const ranked = document.querySelector('.ranked');
 const rankedSolo = document.querySelector('.ranked-solo');
 const rankedFlex = document.querySelector('.ranked-flex');
@@ -47,17 +51,6 @@ const summonerInfo = document.querySelector('.summoner-info');
 buttonReturnToSearchSummoner.addEventListener('click', returnToSearchSummoner);
 const loadingSummoner = document.querySelector('.loading-summoner');
 
-function returnToSearchSummoner() {
-    inputSummoner.value = '';
-    summary.style.display = 'none';
-    summonerInfo.style.display = 'none';
-    resetButtonsBackgroundColor();
-    ranked.style.display = 'none';
-    championMastery.style.display = 'none';
-    matchHistory.style.display = 'none';
-    formSummoner.style.display = 'grid';
-}
-
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', fetchCurrentVersion);
 } else {
@@ -77,9 +70,23 @@ async function fetchCurrentVersion() {
     }
 }
 
+inputSummoner.addEventListener('input', statusButtonSubmitSummoner);
+
+function statusButtonSubmitSummoner() {
+    if (inputSummoner.value.length !== 0) {
+        buttonSubmitSummoner.disabled = false;
+        buttonSubmitSummoner.classList.add('button-submit-summoner-enabled');
+    } else {
+        buttonSubmitSummoner.disabled = true;
+        buttonSubmitSummoner.classList.remove('button-submit-summoner-enabled');
+    }
+}
+
 async function fetchSummonerData() {
     try {
         formSummoner.style.display = 'none';
+        notifyError.style.display = 'none';
+        errorDescription.innerHTML = '';
         setTimeout(() => loadingSummoner.style.display = 'block', 100);
         const summoner = encodeURI(inputSummoner.value);
         const region = regionSummoner.options[regionSummoner.selectedIndex].value;
@@ -97,9 +104,20 @@ async function fetchSummonerData() {
         };
         const response = await fetch('/', options);
         const data = await response.json();
+        console.log(data);
+        if (data[0] === 'Error') {
+            loadingSummoner.style.display = 'none';
+            formSummoner.style.display = 'grid';
+            summonerInfo.style.display = 'block';
+            buttons.style.display = 'none';
+            notifyError.style.display = 'block';
+            inputSummoner.value = '';
+            if (data[1] === '404') errorDescription.innerHTML = `Player was not found. Verify if the player's name and region are correct.`;
+            if (data[1] === 'Unable to fetch the data from the Summoner API') errorDescription.innerHTML = `We were unable to fetch and display the information that you've requested.`;
+            return;
+        }
         console.log('SUMMONER DATA:');
         console.log(data);
-        if (data === '404') return summary.innerHTML = 'PLAYER NOT FOUND';
         ACCOUNT_ID = data.accountId;
         SUMMONER_ID = data.id;
         SUMMONER_NAME = data.name;
@@ -120,6 +138,7 @@ async function displaySummonerSummary(data, server) {
     loadingSummoner.style.display = 'none';
     summary.style.display = 'block';
     summonerInfo.style.display = 'block';
+    buttons.style.display = 'grid';
     const summonerName = document.querySelector('.summoner-name');
     const summonerLevel = document.querySelector('.summoner-level');
     const summonerIcon = document.querySelector('.summoner-icon');
@@ -196,6 +215,8 @@ function resetSummonerInfo() {
     ranked.style.display = 'none';
     championMastery.style.display = 'none';
     matchHistory.style.display = 'none';
+    notifyError.style.display = 'none';
+    errorDescription.innerHTML = '';
 }
 
 async function fetchRankedData() {
@@ -235,7 +256,7 @@ async function displayRanked(data) {
             const rankedSoloFirstCharacter = rawRankedSolo.charAt(0);
             const rankedSoloFromSecondCharacter = rawRankedSolo.slice(1).toLowerCase();
             const rankedSoloFixed = rankedSoloFirstCharacter + rankedSoloFromSecondCharacter;
-            rankedSoloElo.innerHTML = `<strong style="font-size: 0.9em">${rankedSoloFixed} ${queue.rank}</strong> <span style="color: #d4d4d4; padding: 0 2px">&#128900;</span> <span style="color: #a289b6; font-size: 0.85em">Ranked Solo</span>`;
+            rankedSoloElo.innerHTML = `<strong style="font-size: 0.9em">${rankedSoloFixed} ${queue.rank}</strong> <span style="color: #d4d4d4; padding: 0 2px">&#128900;</span> <span style="color: rgba(255, 255, 255, 0.6); font-size: 0.85em">Ranked Solo</span>`;
             let RANKED_SOLO_WIN_RATE_COLOR;
             const getRankedSoloWinRate = () => {
                 let winRate = (((queue.wins) / (queue.wins + queue.losses)) * 100).toFixed(1);
@@ -254,7 +275,7 @@ async function displayRanked(data) {
             const rankedFlexFirstCharacter = rawRankedFlex.charAt(0);
             const rankedFlexFromSecondCharacter = rawRankedFlex.slice(1).toLowerCase();
             const rankedFlexFixed = rankedFlexFirstCharacter + rankedFlexFromSecondCharacter;
-            rankedFlexElo.innerHTML = `<strong style="font-size: 0.9em">${rankedFlexFixed} ${queue.rank}</strong> <span style="color: #d4d4d4; padding: 0 2px">&#128900;</span> <span style="color: #a289b6; font-size: 0.85em">Ranked Flex</span>`;
+            rankedFlexElo.innerHTML = `<strong style="font-size: 0.9em">${rankedFlexFixed} ${queue.rank}</strong> <span style="color: #d4d4d4; padding: 0 2px">&#128900;</span> <span style="color: rgba(255, 255, 255, 0.6); font-size: 0.85em">Ranked Flex</span>`;
             let RANKED_FLEX_WIN_RATE_COLOR;
             const getRankedFlexWinRate = () => {
                 let winRate = (((queue.wins) / (queue.wins + queue.losses)) * 100).toFixed(1);
@@ -345,7 +366,6 @@ async function displayChampionMastery(data, startIndex, endIndex) {
                 const divChampionMasteryHeader = document.createElement('div');
                 const divChampionMasteryMain = document.createElement('div');
                 const divChampionMasteryFooter = document.createElement('div');
-
                 const championMasteryRank = document.createElement('p');
                 const divChampionImage = document.createElement('div');
                 const championImage = document.createElement('img');
@@ -388,20 +408,15 @@ async function displayChampionMastery(data, startIndex, endIndex) {
                 divChampionNameAndTitle.appendChild(championName);
                 divChampionNameAndTitle.appendChild(championTitle);
                 divChampionMasteryAndPoints.appendChild(championPoints);
-
                 divChampionMasteryHeader.appendChild(championMasteryRank);
                 divChampionMasteryMain.appendChild(divChampionImage);
                 divChampionMasteryMain.appendChild(divChampionNameAndTitle);
                 divChampionMasteryMain.appendChild(divChampionMasteryAndPoints);
                 divChampionMasteryFooter.appendChild(championLastPlayed);
-
                 div.appendChild(divChampionMasteryHeader);
                 div.appendChild(divChampionMasteryMain);
                 div.appendChild(divChampionMasteryFooter);
-
-                console.log(div);
                 arrayChampionMastery.push(div);
-
             }
         }
     });
@@ -429,10 +444,11 @@ function resetChampionMastery() {
     MASTERIES_END_INDEX = 5;
     CHAMPION_MASTERY_RANK = 1;
     CHAMPION_MASTERY = [];
-    buttonLoadMoreMasteries.style.display = 'block';
+    buttonLoadMoreMasteries.style.display = 'none';
     loadingMoreMasteries.style.display = 'none';
     noMoreMasteries.style.display = 'none';
     moreMasteries.classList.remove('no-more-masteries-display');
+    moreMasteries.classList.remove('more-masteries-loading');
 }
 
 buttonLoadMoreMasteries.addEventListener('click', async () => {
@@ -464,28 +480,20 @@ function adjustChampionMasteryAfterDisplay() {
 }
 
 
+
+
 // MATCH HISTORY
 let MATCH_HISTORY = [];
-let MATCHES_START_INDEX = 0;
-let MATCHES_END_INDEX = 5;
+let MATCHES_START_INDEX, MATCHES_END_INDEX;
 const moreMatches = document.querySelector('.more-matches');
 const loadingMoreMatches = document.querySelector('.loading-more-matches');
 const buttonLoadMoreMatches = document.querySelector('.button-load-more-matches');
-buttonLoadMoreMatches.addEventListener('click', () => {
-    buttonLoadMoreMatches.style.display = 'none';
-    moreMatches.classList.add('more-matches-loading');
-    loadingMoreMatches.style.display = 'block';
-    fetchMatches(MATCHES_START_INDEX, MATCHES_END_INDEX);
-});
 
 async function fetchMatchHistory() {
     try {
         resetButtonsBackgroundColor();
         resetSummonerInfo();
         resetMatchHistory();
-        MATCH_HISTORY = [];
-        MATCHES_START_INDEX = 0;
-        MATCHES_END_INDEX = 5;
         buttonMatchHistory.style.backgroundColor = 'rgba(93, 84, 164, 0.5)';
         setTimeout(() => loadingSummonerInfo.style.display = 'block', 100);
         const options = {
@@ -500,7 +508,15 @@ async function fetchMatchHistory() {
         }
         const response = await fetch('/match-history', options);
         const data = await response.json();
+        if (data === 'Unable to fetch data from the Match History API') {
+            loadingSummonerInfo.style.display = 'none';
+            notifyError.style.display = 'block';
+            errorDescription.innerHTML = `We couldn't find any matches for ${SUMMONER_NAME}.`;
+            return;
+        }
+        console.log(data);
         MATCH_HISTORY = data.matches;
+        console.log('MATCH HISTORY:');
         console.log(MATCH_HISTORY);
         await fetchMatches(MATCHES_START_INDEX, MATCHES_END_INDEX);
     } catch (err) {
@@ -513,14 +529,10 @@ async function fetchMatches(startIndex, endIndex) {
     try {
         matchHistory.style.display = 'block';
         let MATCHES_ID = [];
-        let MATCHES_ID_ORDER = [];
-        let getMatches = MATCH_HISTORY.slice(startIndex, endIndex);
-        getMatches.map(match => MATCHES_ID.push(match.gameId));
-        console.log(MATCHES_ID);
-        MATCHES_ID_ORDER = MATCHES_ID.sort();
-        console.log(MATCHES_ID_ORDER);
-        for (let i = 0; i < MATCHES_ID_ORDER.length; i++) {
-            console.log(MATCHES_ID_ORDER[i]);
+        let matches = MATCH_HISTORY.slice(startIndex, endIndex);
+        console.log(matches.length);
+        matches.map(match => MATCHES_ID.push(match.gameId));
+        for (let i = 0; i < MATCHES_ID.length; i++) {
             const options = {
                 method: 'POST',
                 headers: {
@@ -528,45 +540,33 @@ async function fetchMatches(startIndex, endIndex) {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    match_id: MATCHES_ID_ORDER[i]
+                    match_id: MATCHES_ID[i]
                 })
             };
             const response = await fetch('/match', options);
             const data = await response.json();
             console.log(data);
-            await fetchMatchesInfo(data);
+            await getMatchesData(data);
         }
-        // After all matches have been fetched, display all of them in the match history
-        loadingSummonerInfo.style.display = 'none';
-        arrayMatches.reverse();
-        arrayMatches.forEach(match => matchHistory.insertAdjacentElement('beforeend', match));
-        arrayMatches = [];
-        MATCHES_START_INDEX += 5;
-        MATCHES_END_INDEX += 5;
-        // Adjusting the 'Show more' button in the bottom of the match history
-        matchHistory.insertAdjacentElement('beforeend', moreMatches);
-        moreMatches.style.display = 'grid';
-        moreMatches.classList.remove('more-matches-loading');
-        loadingMoreMatches.style.display = 'none';
-        buttonLoadMoreMatches.style.display = 'block';
+        displayMatches();
     } catch (err) {
         console.log('Error in function: fetchMatches');
         console.error(err);
     }
 }
 
-async function fetchMatchesInfo(data) {
+async function getMatchesData(data) {
     const players = data.participantIdentities;
     for (let i in players) {
         if (players[i].player.currentAccountId == ACCOUNT_ID) {
             const matchData = data;
             const playerData = data.participants[i];
-            displayMatchesInfo(matchData, playerData);
+            assembleMatches(matchData, playerData);
         }
     }
 }
 
-function displayMatchesInfo(matchData, playerData) {
+function assembleMatches(matchData, playerData) {
     
     console.log(matchData);
     console.log(playerData);
@@ -586,6 +586,7 @@ function displayMatchesInfo(matchData, playerData) {
     const buttonExpandInfo = document.createElement('button');
     const summonerItems = document.createElement('div');
     const summonersChampions = document.createElement('div');
+    let MATCH_TIMESTAMP;
     div.className = 'match';
     div.id = matchData.gameId;
     divHeader.className = 'match-header';
@@ -880,6 +881,11 @@ function displayMatchesInfo(matchData, playerData) {
 
             getSummonersChampions(matchData.participants);
 
+            // Getting match timestamp
+            const getMatchTimestamp = (matchCreation, matchDuration) => MATCH_TIMESTAMP = matchCreation + (matchDuration * 1000);
+
+            getMatchTimestamp(matchData.gameCreation, matchData.gameDuration)
+
         }
     }
 
@@ -895,10 +901,7 @@ function displayMatchesInfo(matchData, playerData) {
     div.appendChild(divInfo);
     div.appendChild(divMoreInfo);
     div.appendChild(divFooter);
-    arrayMatches.push(div);
-
-    // goldEarned.innerHTML = `Gold: ${(playerData.stats.goldEarned/1000).toFixed(1)}k`;
-    
+    arrayMatches.push({content: div, timestamp: MATCH_TIMESTAMP});
 }
 
 window.addEventListener('click', event => {
@@ -933,24 +936,50 @@ window.addEventListener('click', event => {
     }
 });
 
+function displayMatches() {
+    loadingSummonerInfo.style.display = 'none';
+    const arrayMatchesInOrder = arrayMatches.sort((a, b) => Number(b.timestamp) - Number(a.timestamp));
+    arrayMatchesInOrder.forEach(match => matchHistory.insertAdjacentElement('beforeend', match.content));
+    arrayMatches = [];
+    MATCHES_START_INDEX += 5;
+    MATCHES_END_INDEX += 5;
+    // Adjusting the 'Show more' button in the bottom of the match history
+    matchHistory.insertAdjacentElement('beforeend', moreMatches);
+    moreMatches.style.display = 'grid';
+    moreMatches.classList.remove('more-matches-loading');
+    loadingMoreMatches.style.display = 'none';
+    buttonLoadMoreMatches.style.display = 'block';
+}
+
 function resetMatchHistory() {
     const matches = document.querySelectorAll('.match');
     const arrayMatches = [...matches];
     arrayMatches.forEach(match => match.remove());
+    MATCH_HISTORY = [];
+    MATCHES_START_INDEX = 0;
+    MATCHES_END_INDEX = 5;
     moreMatches.style.display = 'none';
     moreMatches.classList.remove('more-matches-loading');
     loadingMoreMatches.style.display = 'none';
     buttonLoadMoreMatches.style.display = 'block';
 }
 
+buttonLoadMoreMatches.addEventListener('click', () => {
+    buttonLoadMoreMatches.style.display = 'none';
+    moreMatches.classList.add('more-matches-loading');
+    loadingMoreMatches.style.display = 'block';
+    fetchMatches(MATCHES_START_INDEX, MATCHES_END_INDEX);
+});
 
 
 
-// ROLE PLAYER WAS PLAYING
-// if summoner's rift
-// if not coop vs ai
-// get role (top, jungler, mid, adc, support)
-// blind pick - 430
-// draft pick - 400
-// ranked solo - 420
-// ranked flex - 440
+function returnToSearchSummoner() {
+    inputSummoner.value = '';
+    summary.style.display = 'none';
+    summonerInfo.style.display = 'none';
+    resetButtonsBackgroundColor();
+    ranked.style.display = 'none';
+    championMastery.style.display = 'none';
+    matchHistory.style.display = 'none';
+    formSummoner.style.display = 'grid';
+}

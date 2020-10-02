@@ -28,7 +28,7 @@ app.post('/', async (request, response) => {
         response.json(summonerData);
     } catch (err) {
         console.log(`This is the error: ${err.message}`);
-        response.json(err.message);
+        response.json(['Error', err.message]);
     }
 });
 
@@ -58,13 +58,12 @@ app.post('/champion-mastery', async (request, response) => {
     }
 });
 
-
 app.post('/match-history', async (request, response) => {
     try {
         const matchHistoryURL = `https://${REGION}.api.riotgames.com/lol/match/v4/matchlists/by-account/${request.body.account_id}?api_key=${LEAGUEOFLEGENDS_API_KEY}`;
         const matchHistoryResponse = await fetch(matchHistoryURL);
         const matchHistoryData = await matchHistoryResponse.json();
-        if (!matchHistoryResponse.ok) throw new Error('ERROR MATCH HISTORY');
+        if (!matchHistoryResponse.ok) throw new Error('Unable to fetch data from the Match History API');
         response.json(matchHistoryData);
     } catch (err) {
         console.log(err.message);
@@ -77,7 +76,7 @@ app.post('/match', async (request, response) => {
         const matchURL = `https://${REGION}.api.riotgames.com/lol/match/v4/matches/${request.body.match_id}?api_key=${LEAGUEOFLEGENDS_API_KEY}`;
         const matchResponse = await fetch(matchURL);
         const matchData = await matchResponse.json();
-        if (!matchResponse.ok) throw new Error('ERROR MATCH ID');
+        if (!matchResponse.ok) throw new Error(`Unable to fetch data from the match ${request.body.match_id}`);
         response.json(matchData);
     } catch (err) {
         console.log(err.message);
@@ -86,8 +85,3 @@ app.post('/match', async (request, response) => {
 });
 
 app.listen(port, () => console.log('Server updated.'));
-
-// RUNES
-// KP
-// https://developer.riotgames.com/docs/lol
-// ^ CTRL+F runes / perk
