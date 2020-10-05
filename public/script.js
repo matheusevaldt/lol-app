@@ -70,7 +70,7 @@ async function fetchCurrentVersion() {
     }
 }
 
-inputSummoner.addEventListener('input', statusButtonSubmitSummoner);
+// inputSummoner.addEventListener('input', statusButtonSubmitSummoner);
 
 function statusButtonSubmitSummoner() {
     if (inputSummoner.value.length !== 0) {
@@ -320,7 +320,7 @@ function getRankedEmblem(id, where) {
 
 // CHAMPION MASTERY
 let arrayChampionMastery = [];
-let CHAMPION_MASTERY, CHAMPION_MASTERY_RANK, MASTERIES_START_INDEX, MASTERIES_END_INDEX;
+let CHAMPION_MASTERY, CHAMPION_MASTERY_RANK, MASTERIES_START_INDEX, MASTERIES_END_INDEX, MASTERIES_COUNT;
 const moreMasteries = document.querySelector('.more-masteries');
 const loadingMoreMasteries = document.querySelector('.loading-more-masteries');
 const buttonLoadMoreMasteries = document.querySelector('.button-load-more-masteries');
@@ -345,23 +345,32 @@ async function fetchChampionMastery() {
         };
         const response = await fetch('/champion-mastery', options);
         const data = await response.json();
+        if (data.length === 0) {
+            loadingSummonerInfo.style.display = 'none';
+            championMastery.style.display = 'block';
+            moreMasteries.style.display = 'grid';
+            moreMasteries.classList.add('no-more-masteries-display');
+            noMoreMasteries.style.display = 'block';
+            noMoreMasteries.innerHTML = `<span style="color: #9791c5; font-weight: 700">${SUMMONER_NAME}</span> doesn't have champion masteries.`;
+            return;
+        }
         console.log('CHAMPION MASTERY:');
         console.log(data);
         CHAMPION_MASTERY = data;
-        await displayChampionMastery(CHAMPION_MASTERY, MASTERIES_START_INDEX, MASTERIES_END_INDEX);
-        adjustChampionMasteryAfterDisplay();
+        await assembleChampionMastery(CHAMPION_MASTERY, MASTERIES_START_INDEX, MASTERIES_END_INDEX);
+        displayChampionMastery();
     } catch (err) {
         console.log('Error in function: fetchChampionMastery');
         console.error(err);
     }
 }
 
-async function displayChampionMastery(data, startIndex, endIndex) {
-    const summonerChampions = data.slice(startIndex, endIndex);
+async function assembleChampionMastery(championMasteryData, startIndex, endIndex) {
+    const summonerChampions = championMasteryData.slice(startIndex, endIndex);
     summonerChampions.forEach(champion => {
-        const championId = champion.championId;
         for (let i in CHAMPIONS_DATA) {
-            if (CHAMPIONS_DATA[i].key == championId) {
+            if (CHAMPIONS_DATA[i].key == champion.championId) {
+
                 const div = document.createElement('div');
                 const divChampionMasteryHeader = document.createElement('div');
                 const divChampionMasteryMain = document.createElement('div');
@@ -417,6 +426,9 @@ async function displayChampionMastery(data, startIndex, endIndex) {
                 div.appendChild(divChampionMasteryMain);
                 div.appendChild(divChampionMasteryFooter);
                 arrayChampionMastery.push(div);
+
+                MASTERIES_COUNT++;
+
             }
         }
     });
@@ -440,10 +452,12 @@ function resetChampionMastery() {
     const champions = document.querySelectorAll('.champion');
     const arrayChampions = [...champions];
     arrayChampions.forEach(champion => champion.remove());
+    CHAMPION_MASTERY = [];
     MASTERIES_START_INDEX = 0;
     MASTERIES_END_INDEX = 5;
     CHAMPION_MASTERY_RANK = 1;
-    CHAMPION_MASTERY = [];
+    MASTERIES_COUNT = 0;
+    moreMasteries.style.display = 'none';
     buttonLoadMoreMasteries.style.display = 'none';
     loadingMoreMasteries.style.display = 'none';
     noMoreMasteries.style.display = 'none';
@@ -451,27 +465,31 @@ function resetChampionMastery() {
     moreMasteries.classList.remove('more-masteries-loading');
 }
 
-buttonLoadMoreMasteries.addEventListener('click', async () => {
+buttonLoadMoreMasteries.addEventListener('click', () => {
     buttonLoadMoreMasteries.style.display = 'none';
     moreMasteries.classList.add('more-masteries-loading');
     loadingMoreMasteries.style.display = 'block';
-    await displayChampionMastery(CHAMPION_MASTERY, MASTERIES_START_INDEX, MASTERIES_END_INDEX);
-    setTimeout(() => adjustChampionMasteryAfterDisplay(), 700);
+    assembleChampionMastery(CHAMPION_MASTERY, MASTERIES_START_INDEX, MASTERIES_END_INDEX);
+    setTimeout(() => displayChampionMastery(), 700);
 });
 
-function adjustChampionMasteryAfterDisplay() {
+function displayChampionMastery() {
     loadingSummonerInfo.style.display = 'none';
     championMastery.style.display = 'block';
     arrayChampionMastery.forEach(mastery => championMastery.insertAdjacentElement('beforeend', mastery));
     arrayChampionMastery = [];
+    manageMoreMasteries();
+}
+
+function manageMoreMasteries() {
     championMastery.insertAdjacentElement('beforeend', moreMasteries);
     moreMasteries.style.display = 'grid';
     moreMasteries.classList.remove('more-masteries-loading');
     loadingMoreMasteries.style.display = 'none';
-    if (CHAMPION_MASTERY_RANK > CHAMPION_MASTERY.length) {
+    if (MASTERIES_COUNT >= CHAMPION_MASTERY.length) {
         moreMasteries.classList.add('no-more-masteries-display');
-        noMoreMasteries.innerHTML = `<span style="color: #ffffff; font-weight: 700">${SUMMONER_NAME}</span> <span style="color: #cecece">doesn't have more masteries.</span>`;
         noMoreMasteries.style.display = 'block';
+        noMoreMasteries.innerHTML = `<span style="color: #9791c5; font-weight: 700">${SUMMONER_NAME}</span> doesn't have more masteries.`;
     } else {
         MASTERIES_START_INDEX += 5;
         MASTERIES_END_INDEX += 5;
@@ -479,15 +497,13 @@ function adjustChampionMasteryAfterDisplay() {
     }
 }
 
-
-
-
 // MATCH HISTORY
 let MATCH_HISTORY = [];
-let MATCHES_START_INDEX, MATCHES_END_INDEX;
+let MATCHES_START_INDEX, MATCHES_END_INDEX, MATCHES_COUNT;
 const moreMatches = document.querySelector('.more-matches');
 const loadingMoreMatches = document.querySelector('.loading-more-matches');
 const buttonLoadMoreMatches = document.querySelector('.button-load-more-matches');
+const noMoreMatches = document.querySelector('.no-more-matches');
 
 async function fetchMatchHistory() {
     try {
@@ -527,10 +543,8 @@ async function fetchMatchHistory() {
 
 async function fetchMatches(startIndex, endIndex) {
     try {
-        matchHistory.style.display = 'block';
         let MATCHES_ID = [];
         let matches = MATCH_HISTORY.slice(startIndex, endIndex);
-        console.log(matches.length);
         matches.map(match => MATCHES_ID.push(match.gameId));
         for (let i = 0; i < MATCHES_ID.length; i++) {
             const options = {
@@ -745,7 +759,10 @@ function assembleMatches(matchData, playerData) {
                 const summonerKDA = document.createElement('p');
                 summonerScore.innerHTML = `${kills} <span class="match-info-span">/</span> ${deaths} <span class="match-info-span">/</span> ${assists}`;
                 let kda = ((kills + assists) / deaths).toFixed(1);
+                console.log(kda)
                 if (isNaN(kda)) kda = 0;
+                if (!isFinite(kda)) kda = kills + assists;
+                console.log(kda);
                 summonerKDA.innerHTML = `${kda} <span class="match-info-span">KDA</span>`;
                 summonerScoreAndKDA.appendChild(summonerScore);
                 summonerScoreAndKDA.appendChild(summonerKDA);
@@ -889,6 +906,8 @@ function assembleMatches(matchData, playerData) {
         }
     }
 
+    MATCHES_COUNT++;
+
     divHeader.appendChild(matchDateAndDuration);
     divInfo.appendChild(summonerChampion);
     divInfo.appendChild(summonerSpells);
@@ -936,21 +955,6 @@ window.addEventListener('click', event => {
     }
 });
 
-function displayMatches() {
-    loadingSummonerInfo.style.display = 'none';
-    const arrayMatchesInOrder = arrayMatches.sort((a, b) => Number(b.timestamp) - Number(a.timestamp));
-    arrayMatchesInOrder.forEach(match => matchHistory.insertAdjacentElement('beforeend', match.content));
-    arrayMatches = [];
-    MATCHES_START_INDEX += 5;
-    MATCHES_END_INDEX += 5;
-    // Adjusting the 'Show more' button in the bottom of the match history
-    matchHistory.insertAdjacentElement('beforeend', moreMatches);
-    moreMatches.style.display = 'grid';
-    moreMatches.classList.remove('more-matches-loading');
-    loadingMoreMatches.style.display = 'none';
-    buttonLoadMoreMatches.style.display = 'block';
-}
-
 function resetMatchHistory() {
     const matches = document.querySelectorAll('.match');
     const arrayMatches = [...matches];
@@ -958,10 +962,13 @@ function resetMatchHistory() {
     MATCH_HISTORY = [];
     MATCHES_START_INDEX = 0;
     MATCHES_END_INDEX = 5;
+    MATCHES_COUNT = 0;
     moreMatches.style.display = 'none';
-    moreMatches.classList.remove('more-matches-loading');
+    buttonLoadMoreMatches.style.display = 'none';
     loadingMoreMatches.style.display = 'none';
-    buttonLoadMoreMatches.style.display = 'block';
+    noMoreMatches.style.display = 'none';
+    moreMatches.classList.remove('more-matches-loading');
+    moreMatches.classList.remove('no-more-matches-display');
 }
 
 buttonLoadMoreMatches.addEventListener('click', () => {
@@ -971,15 +978,38 @@ buttonLoadMoreMatches.addEventListener('click', () => {
     fetchMatches(MATCHES_START_INDEX, MATCHES_END_INDEX);
 });
 
+function displayMatches() {
+    loadingSummonerInfo.style.display = 'none';
+    matchHistory.style.display = 'block';
+    const arrayMatchesInOrder = arrayMatches.sort((a, b) => Number(b.timestamp) - Number(a.timestamp));
+    arrayMatchesInOrder.forEach(match => matchHistory.insertAdjacentElement('beforeend', match.content));
+    arrayMatches = [];
+    manageMoreMatches();
+}
 
+function manageMoreMatches() {
+    matchHistory.insertAdjacentElement('beforeend', moreMatches);
+    moreMatches.style.display = 'grid';
+    moreMatches.classList.remove('more-matches-loading');
+    loadingMoreMatches.style.display = 'none';
+    if (MATCHES_COUNT >= MATCH_HISTORY.length) {
+        moreMatches.classList.add('no-more-matches-display');
+        noMoreMatches.style.display = 'block';
+        noMoreMatches.innerHTML = `<span style="color: #9791c5; font-weight: 700">${SUMMONER_NAME}</span> hasn't played more matches.`;
+    } else {
+        MATCHES_START_INDEX += 5;
+        MATCHES_END_INDEX += 5;
+        buttonLoadMoreMatches.style.display = 'block';
+    }
+}
 
 function returnToSearchSummoner() {
     inputSummoner.value = '';
+    formSummoner.style.display = 'grid';
     summary.style.display = 'none';
     summonerInfo.style.display = 'none';
-    resetButtonsBackgroundColor();
     ranked.style.display = 'none';
     championMastery.style.display = 'none';
     matchHistory.style.display = 'none';
-    formSummoner.style.display = 'grid';
+    resetButtonsBackgroundColor();
 }
