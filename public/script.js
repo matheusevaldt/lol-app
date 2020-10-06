@@ -1,6 +1,10 @@
-const inputSummoner = document.querySelector('.input-summoner');
-const buttonSubmitSummoner = document.querySelector('.button-submit-summoner');
-const regionSummoner = document.querySelector('.region-summoner');
+const searchSummoner = document.querySelector('.search-summoner');
+const overviewSummoner = document.querySelector('.overview-summoner');
+const inputSearchSummoner = document.querySelector('.input-search-summoner');
+const buttonSearchSummoner = document.querySelector('.button-search-summoner');
+const summonerRegion = document.querySelector('.summoner-region');
+const loadingSearchSummoner = document.querySelector('.loading-search-summoner');
+const buttonReturnToSearchSummoner = document.querySelector('.button-return-to-search-summoner');
 
 let ACCOUNT_ID;
 let SUMMONER_ID;
@@ -14,9 +18,16 @@ let arrayMatches = [];
 
 const notifyError = document.querySelector('.notify-error');
 const errorDescription = document.querySelector('.error-description');
+
 const buttons = document.querySelector('.buttons');
+const buttonRanked = document.querySelector('.button-ranked');
+const buttonChampionMastery = document.querySelector('.button-champion-mastery');
+const buttonMatchHistory = document.querySelector('.button-match-history');
 
 const ranked = document.querySelector('.ranked');
+const championMastery = document.querySelector('.champion-mastery');
+const matchHistory = document.querySelector('.match-history');
+
 const rankedSolo = document.querySelector('.ranked-solo');
 const rankedFlex = document.querySelector('.ranked-flex');
 const rankedSoloEmblem = document.querySelector('.ranked-solo-emblem');
@@ -25,31 +36,19 @@ const rankedSoloElo = document.querySelector('.ranked-solo-elo');
 const rankedFlexElo = document.querySelector('.ranked-flex-elo');
 const rankedSoloLeaguePointsWinRate = document.querySelector('.ranked-solo-league-points-win-rate');
 const rankedFlexLeaguePointsWinRate = document.querySelector('.ranked-flex-league-points-win-rate');
-const buttonRanked = document.querySelector('.button-ranked');
 
+const summonerInfo = document.querySelector('.summoner-info');
 const loadingSummonerInfo = document.querySelector('.loading-summoner-info');
 
-const buttonChampionMastery = document.querySelector('.button-champion-mastery');
-const buttonMatchHistory = document.querySelector('.button-match-history');
-
-const matchHistory = document.querySelector('.match-history');
-// const loadingMatches = document.querySelector('.loading-matches');
-
-buttonSubmitSummoner.addEventListener('click', event => event.preventDefault());
-buttonSubmitSummoner.addEventListener('click', fetchSummonerData);
+inputSearchSummoner.addEventListener('input', statusButtonSearchSummoner);
+buttonSearchSummoner.addEventListener('click', event => event.preventDefault());
+buttonSearchSummoner.addEventListener('click', fetchSummonerData);
 buttonRanked.addEventListener('click', fetchRankedData);
 buttonChampionMastery.addEventListener('click', fetchChampionMastery);
 buttonMatchHistory.addEventListener('click', fetchMatchHistory);
-
-const championMastery = document.querySelector('.champion-mastery');
-
-const formSummoner = document.querySelector('.form-summoner');
-const summary = document.querySelector('.summary');
-const buttonReturnToSearchSummoner = document.querySelector('.button-return-to-search-summoner');
-const summonerInfo = document.querySelector('.summoner-info');
-
 buttonReturnToSearchSummoner.addEventListener('click', returnToSearchSummoner);
-const loadingSummoner = document.querySelector('.loading-summoner');
+
+buttonSearchSummoner.disabled = true;
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', fetchCurrentVersion);
@@ -70,27 +69,25 @@ async function fetchCurrentVersion() {
     }
 }
 
-// inputSummoner.addEventListener('input', statusButtonSubmitSummoner);
-
-function statusButtonSubmitSummoner() {
-    if (inputSummoner.value.length !== 0) {
-        buttonSubmitSummoner.disabled = false;
-        buttonSubmitSummoner.classList.add('button-submit-summoner-enabled');
+function statusButtonSearchSummoner() {
+    if (inputSearchSummoner.value.length !== 0) {
+        buttonSearchSummoner.disabled = false;
+        buttonSearchSummoner.classList.add('button-search-summoner-enabled');
     } else {
-        buttonSubmitSummoner.disabled = true;
-        buttonSubmitSummoner.classList.remove('button-submit-summoner-enabled');
+        buttonSearchSummoner.disabled = true;
+        buttonSearchSummoner.classList.remove('button-search-summoner-enabled');
     }
 }
 
 async function fetchSummonerData() {
     try {
-        formSummoner.style.display = 'none';
+        searchSummoner.style.display = 'none';
         notifyError.style.display = 'none';
         errorDescription.innerHTML = '';
-        setTimeout(() => loadingSummoner.style.display = 'block', 100);
-        const summoner = encodeURI(inputSummoner.value);
-        const region = regionSummoner.options[regionSummoner.selectedIndex].value;
-        const server = regionSummoner.options[regionSummoner.selectedIndex].text;
+        setTimeout(() => loadingSearchSummoner.style.display = 'block', 100);
+        const summoner = encodeURI(inputSearchSummoner.value);
+        const region = summonerRegion.options[summonerRegion.selectedIndex].value;
+        const server = summonerRegion.options[summonerRegion.selectedIndex].text;
         const options = {
             method: 'POST',
             headers: {
@@ -106,14 +103,21 @@ async function fetchSummonerData() {
         const data = await response.json();
         console.log(data);
         if (data[0] === 'Error') {
-            loadingSummoner.style.display = 'none';
-            formSummoner.style.display = 'grid';
+            loadingSearchSummoner.style.display = 'none';
+            searchSummoner.style.display = 'grid';
             summonerInfo.style.display = 'block';
             buttons.style.display = 'none';
             notifyError.style.display = 'block';
-            inputSummoner.value = '';
-            if (data[1] === '404') errorDescription.innerHTML = `Player was not found. Verify if the player's name and region are correct.`;
-            if (data[1] === 'Unable to fetch the data from the Summoner API') errorDescription.innerHTML = `We were unable to fetch and display the information that you've requested.`;
+            inputSearchSummoner.value = '';
+            if (data[1] === '404') {
+                errorDescription.innerHTML = `
+                Summoner hasn't been found. <br>
+                Verify if you've correctly inserted both the summoner's name and region.
+                `;
+            }
+            if (data[1] === 'Unable to fetch the data from the Summoner API') {
+                errorDescription.innerHTML = `We were unable to fetch and display the information that you've requested.`;
+            }
             return;
         }
         console.log('SUMMONER DATA:');
@@ -121,7 +125,7 @@ async function fetchSummonerData() {
         ACCOUNT_ID = data.accountId;
         SUMMONER_ID = data.id;
         SUMMONER_NAME = data.name;
-        await displaySummonerSummary(data, server);
+        await displaySummonerOverview(data, server);
         const championsData = await fetchChampionsData();
         const spellsData = await fetchSpellsData();
         const runesData = await fetchRunesData();
@@ -134,19 +138,19 @@ async function fetchSummonerData() {
     }
 }
 
-async function displaySummonerSummary(data, server) {
-    loadingSummoner.style.display = 'none';
-    summary.style.display = 'block';
+async function displaySummonerOverview(data, server) {
+    loadingSearchSummoner.style.display = 'none';
+    overviewSummoner.style.display = 'block';
     summonerInfo.style.display = 'block';
     buttons.style.display = 'grid';
-    const summonerName = document.querySelector('.summoner-name');
-    const summonerLevel = document.querySelector('.summoner-level');
-    const summonerIcon = document.querySelector('.summoner-icon');
-    const summonerServer = document.querySelector('.summoner-server');
-    summonerName.innerHTML = data.name;
-    summonerLevel.innerHTML = data.summonerLevel;
-    summonerIcon.src = `https://ddragon.leagueoflegends.com/cdn/${CURRENT_VERSION}/img/profileicon/${data.profileIconId}.png`;
-    summonerServer.innerHTML = `${server} #1`;
+    const overviewIcon = document.querySelector('.overview-icon');
+    const overviewLevel = document.querySelector('.overview-level');
+    const overviewName = document.querySelector('.overview-name');
+    const overviewServer = document.querySelector('.overview-server');
+    overviewIcon.src = `https://ddragon.leagueoflegends.com/cdn/${CURRENT_VERSION}/img/profileicon/${data.profileIconId}.png`;
+    overviewLevel.innerHTML = data.summonerLevel;
+    overviewName.innerHTML = data.name;
+    overviewServer.innerHTML = server;
 }
 
 async function fetchChampionsData() {
@@ -238,6 +242,12 @@ async function fetchRankedData() {
         };
         const response = await fetch('/ranked', options);
         const data = await response.json();
+        if (data === 'Unable to fetch data from the League API') {
+            loadingSummonerInfo.style.display = 'none';
+            notifyError.style.display = 'block';
+            errorDescription.innerHTML = `We were unable to fetch and display the information that you've requested.`;
+            return;
+        }
         console.log('SUMMONER RANKED DATA:');
         console.log(data);
         await displayRanked(data);
@@ -256,7 +266,13 @@ async function displayRanked(data) {
             const rankedSoloFirstCharacter = rawRankedSolo.charAt(0);
             const rankedSoloFromSecondCharacter = rawRankedSolo.slice(1).toLowerCase();
             const rankedSoloFixed = rankedSoloFirstCharacter + rankedSoloFromSecondCharacter;
-            rankedSoloElo.innerHTML = `<strong style="font-size: 0.9em">${rankedSoloFixed} ${queue.rank}</strong> <span style="color: #d4d4d4; padding: 0 2px">&#128900;</span> <span style="color: rgba(255, 255, 255, 0.6); font-size: 0.85em">Ranked Solo</span>`;
+            let rankedSoloDivision = queue.rank;
+            if (rankedSoloFixed === 'Master' || rankedSoloFixed === 'Grandmaster' || rankedSoloFixed === 'Challenger') rankedSoloDivision = '';
+            rankedSoloElo.innerHTML = `
+            <strong style="font-size: 0.9em">${rankedSoloFixed} ${rankedSoloDivision}</strong> 
+            <span style="color: #d4d4d4; padding: 0 2px">&#128900;</span> 
+            <span style="color: rgba(255, 255, 255, 0.6); font-size: 0.85em">Ranked Solo</span>
+            `;
             let RANKED_SOLO_WIN_RATE_COLOR;
             const getRankedSoloWinRate = () => {
                 let winRate = (((queue.wins) / (queue.wins + queue.losses)) * 100).toFixed(1);
@@ -275,7 +291,13 @@ async function displayRanked(data) {
             const rankedFlexFirstCharacter = rawRankedFlex.charAt(0);
             const rankedFlexFromSecondCharacter = rawRankedFlex.slice(1).toLowerCase();
             const rankedFlexFixed = rankedFlexFirstCharacter + rankedFlexFromSecondCharacter;
-            rankedFlexElo.innerHTML = `<strong style="font-size: 0.9em">${rankedFlexFixed} ${queue.rank}</strong> <span style="color: #d4d4d4; padding: 0 2px">&#128900;</span> <span style="color: rgba(255, 255, 255, 0.6); font-size: 0.85em">Ranked Flex</span>`;
+            let rankedFlexDivision = queue.rank;
+            if (rankedFlexFixed === 'Master' || rankedFlexFixed === 'Grandmaster' || rankedFlexFixed === 'Challenger') rankedFlexDivision = '';
+            rankedFlexElo.innerHTML = `
+            <strong style="font-size: 0.9em">${rankedFlexFixed} ${rankedFlexDivision}</strong> 
+            <span style="color: #d4d4d4; padding: 0 2px">&#128900;</span> 
+            <span style="color: rgba(255, 255, 255, 0.6); font-size: 0.85em">Ranked Flex</span>
+            `;
             let RANKED_FLEX_WIN_RATE_COLOR;
             const getRankedFlexWinRate = () => {
                 let winRate = (((queue.wins) / (queue.wins + queue.losses)) * 100).toFixed(1);
@@ -345,6 +367,12 @@ async function fetchChampionMastery() {
         };
         const response = await fetch('/champion-mastery', options);
         const data = await response.json();
+        if (data === 'Unable to fetch data from the Champion Mastery API') {
+            loadingSummonerInfo.style.display = 'none';
+            notifyError.style.display = 'block';
+            errorDescription.innerHTML = `We were unable to fetch and display the information that you've requested.`;
+            return;
+        }
         if (data.length === 0) {
             loadingSummonerInfo.style.display = 'none';
             championMastery.style.display = 'block';
@@ -527,7 +555,12 @@ async function fetchMatchHistory() {
         if (data === 'Unable to fetch data from the Match History API') {
             loadingSummonerInfo.style.display = 'none';
             notifyError.style.display = 'block';
-            errorDescription.innerHTML = `We couldn't find any matches for ${SUMMONER_NAME}.`;
+            errorDescription.innerHTML = `
+            We were unable to fetch and display the information that you've requested. <br> <br>
+            <span style="font-weight: 700">This might be because:</span> <br>
+            <span style="padding-right: 2px">&#128900;</span> Summoner hasn't played any matches <br>
+            <span style="padding-right: 2px">&#128900;</span> Summoner is in a long period of inactivity
+            `;
             return;
         }
         console.log(data);
@@ -1004,9 +1037,9 @@ function manageMoreMatches() {
 }
 
 function returnToSearchSummoner() {
-    inputSummoner.value = '';
-    formSummoner.style.display = 'grid';
-    summary.style.display = 'none';
+    inputSearchSummoner.value = '';
+    searchSummoner.style.display = 'grid';
+    overviewSummoner.style.display = 'none';
     summonerInfo.style.display = 'none';
     ranked.style.display = 'none';
     championMastery.style.display = 'none';
