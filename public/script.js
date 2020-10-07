@@ -229,7 +229,7 @@ async function fetchRankedData() {
         resetSummonerInfo();
         resetRanked();
         buttonRanked.style.backgroundColor = 'rgba(93, 84, 164, 0.5)';
-        setTimeout(() => loadingSummonerInfo.style.display = 'block', 100);
+        loadingSummonerInfo.style.display = 'block';
         const options = {
             method: 'POST',
             headers: {
@@ -242,10 +242,12 @@ async function fetchRankedData() {
         };
         const response = await fetch('/ranked', options);
         const data = await response.json();
-        if (data === 'Unable to fetch data from the League API') {
-            loadingSummonerInfo.style.display = 'none';
-            notifyError.style.display = 'block';
-            errorDescription.innerHTML = `We were unable to fetch and display the information that you've requested.`;
+        if (data[0] === 'Error') {
+            setTimeout(() => {
+                loadingSummonerInfo.style.display = 'none';
+                notifyError.style.display = 'block';
+                errorDescription.innerHTML = `We were unable to fetch and display the information that you've requested.`;
+            }, 300);
             return;
         }
         console.log('SUMMONER RANKED DATA:');
@@ -1045,4 +1047,28 @@ function returnToSearchSummoner() {
     championMastery.style.display = 'none';
     matchHistory.style.display = 'none';
     resetButtonsBackgroundColor();
+    buttonSearchSummoner.disabled = true;
+    buttonSearchSummoner.classList.remove('button-search-summoner-enabled');
 }
+
+const buttonScrollToTop = document.querySelector('.button-scroll-to-top');
+const scrollToTopImage = document.querySelector('.scroll-to-top-image');
+
+window.addEventListener('scroll', () => {
+    const scroll = window.scrollY;
+    if (scroll > 500) {
+        buttonScrollToTop.style.display = 'flex';
+    } else {
+        buttonScrollToTop.style.display = 'none';
+    }
+});
+
+buttonScrollToTop.addEventListener('click', () => {
+    setTimeout(() => {
+        window.scroll({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'
+        });
+    }, 200);
+});

@@ -41,7 +41,7 @@ app.post('/ranked', async (request, response) => {
         response.json(rankedData);
     } catch (err) {
         console.log(`This is the error: ${err.message}`);
-        response.json(err.message);
+        response.json(['Error', err.message]);
     }
 });
 

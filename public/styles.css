@@ -9,10 +9,16 @@ button {
 }
 
 *:focus {
-    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
     outline: none;
     -ms-touch-action: manipulation;
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 ul {
@@ -252,7 +258,7 @@ header h2 {
     color: #fff;
     font-weight: 700;
 }
-
+/*  */
 .ranked {
     display: none;
     flex-direction: column;
@@ -261,7 +267,7 @@ header h2 {
 
 .ranked-solo,
 .ranked-flex {
-    background-color: #27215a;
+    background-image: linear-gradient(to right,#27215a , #342d80);
     border: 2px solid #1a1644;
     display: flex;
     width: 90%;
@@ -394,7 +400,8 @@ header h2 {
     grid-template-areas: "show-more-masteries";
     width: 90%;
     height: 40px;
-    margin: 20px 5%;
+    /* margin: 20px 5%; */
+    margin: 20px auto;
     text-align: center;
 }
 
@@ -443,7 +450,7 @@ header h2 {
 }
 
 
-
+/**/
 
 
 
@@ -686,7 +693,8 @@ header h2 {
     display: none;
     height: 40px;
     width: 90%;
-    margin: 2px 5% 20px 5%;
+    /* margin: 2px 5% 20px 5%; */
+    margin: 2px auto 20px auto;
     text-align: center;
 }
 
@@ -732,3 +740,133 @@ header h2 {
 .no-more-matches-display {
     grid-template-areas: "no-more-matches";
 }
+
+.button-scroll-to-top {
+    display: none;
+    background-color: transparent;
+    border: none;
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+}
+
+.scroll-to-top-image {
+    width: 48px;
+    opacity: 0.3;
+    transition: opacity 0.3s ease-out;
+}
+
+.button-scroll-to-top:hover > .scroll-to-top-image,
+.button-scroll-to-top:focus > .scroll-to-top-image {
+    opacity: 1;
+}
+
+
+
+
+
+
+/* MEDIA QUERIES */
+@media (min-width: 520px) {
+
+    header {
+        width: 100%;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        padding: 55px 0;
+    }
+
+    .search-and-overview-summoner {
+        width: 520px;
+        margin: 0 auto;
+        padding: 0;
+        top: -21px;
+    }
+
+    .loading-search-summoner {
+        margin: 35px auto 0 auto;
+    }
+
+    .search-summoner {
+        grid-template-columns: 48% 32% 20%;
+    }
+
+    .overview-summoner {
+        width: 380px;
+        margin: 35px auto 0 auto;
+    }
+
+    .button-return-to-search-summoner {
+        right: 0;
+        top: 55%;
+    }
+
+    .summoner-info {
+        width: 520px;
+        margin: 4px auto 0 auto;
+    }
+
+    .buttons button:first-of-type {
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+    }
+
+    .buttons button:last-of-type {
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+    }
+
+    .ranked {
+        margin-top: 25px;
+    }
+
+    .ranked-solo,
+    .ranked-flex {
+        width: 70%;
+    }
+
+    .champion-mastery {
+        margin-top: 25px;
+    }
+
+    .champion {
+        width: 70%;
+    }
+
+    .more-masteries {
+        width: 70%;
+    }
+
+    .match-history {
+        margin-top: 25px;
+    }
+
+    .match {
+        width: 70%;
+        padding: 5px 10px;
+    }
+
+    .match-items {
+        margin-right: 25px;
+    }
+
+    .match-champions {
+        flex: none;
+    }
+
+    .more-matches {
+        width: 70%;
+    }
+
+    .notify-error {
+        width: 100%;
+    }
+
+}
+
+/* 
+    ['Error', err.message'] in mastery and match history
+    do the same like it is in ranked
+
+    remove setTimeout loadingSummonerInfo when fetching mastery and match history also
+*/
