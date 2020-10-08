@@ -84,7 +84,7 @@ async function fetchSummonerData() {
         searchSummoner.style.display = 'none';
         notifyError.style.display = 'none';
         errorDescription.innerHTML = '';
-        setTimeout(() => loadingSearchSummoner.style.display = 'block', 100);
+        loadingSearchSummoner.style.display = 'block';
         const summoner = encodeURI(inputSearchSummoner.value);
         const region = summonerRegion.options[summonerRegion.selectedIndex].value;
         const server = summonerRegion.options[summonerRegion.selectedIndex].text;
@@ -103,21 +103,22 @@ async function fetchSummonerData() {
         const data = await response.json();
         console.log(data);
         if (data[0] === 'Error') {
-            loadingSearchSummoner.style.display = 'none';
-            searchSummoner.style.display = 'grid';
-            summonerInfo.style.display = 'block';
-            buttons.style.display = 'none';
-            notifyError.style.display = 'block';
-            inputSearchSummoner.value = '';
-            if (data[1] === '404') {
-                errorDescription.innerHTML = `
-                Summoner hasn't been found. <br>
-                Verify if you've correctly inserted both the summoner's name and region.
-                `;
-            }
-            if (data[1] === 'Unable to fetch the data from the Summoner API') {
-                errorDescription.innerHTML = `We were unable to fetch and display the information that you've requested.`;
-            }
+            setTimeout(() => {
+                loadingSearchSummoner.style.display = 'none';
+                searchSummoner.style.display = 'grid';
+                summonerInfo.style.display = 'block';
+                buttons.style.display = 'none';
+                notifyError.style.display = 'block';
+                inputSearchSummoner.value = '';
+                if (data[1] === '404') {
+                    errorDescription.innerHTML = `
+                    Summoner hasn't been found. <br>
+                    Verify if you've correctly inserted both the summoner's name and region.
+                    `;
+                } else {
+                    errorDescription.innerHTML = `We were unable to fetch and display the information that you've requested.`;
+                }
+            }, 300);
             return;
         }
         console.log('SUMMONER DATA:');
@@ -356,7 +357,7 @@ async function fetchChampionMastery() {
         resetSummonerInfo();
         resetChampionMastery();
         buttonChampionMastery.style.backgroundColor = 'rgba(93, 84, 164, 0.5)';
-        setTimeout(() => loadingSummonerInfo.style.display = 'block', 100);
+        loadingSummonerInfo.style.display = 'block';
         const options = {
             method: 'POST',
             headers: {
@@ -369,19 +370,24 @@ async function fetchChampionMastery() {
         };
         const response = await fetch('/champion-mastery', options);
         const data = await response.json();
-        if (data === 'Unable to fetch data from the Champion Mastery API') {
-            loadingSummonerInfo.style.display = 'none';
-            notifyError.style.display = 'block';
-            errorDescription.innerHTML = `We were unable to fetch and display the information that you've requested.`;
+        if (data[0] === 'Error') {
+            setTimeout(() => {
+                console.log('aa');
+                loadingSummonerInfo.style.display = 'none';
+                notifyError.style.display = 'block';
+                errorDescription.innerHTML = `We were unable to fetch and display the information that you've requested.`;
+            }, 300);
             return;
         }
         if (data.length === 0) {
-            loadingSummonerInfo.style.display = 'none';
-            championMastery.style.display = 'block';
-            moreMasteries.style.display = 'grid';
-            moreMasteries.classList.add('no-more-masteries-display');
-            noMoreMasteries.style.display = 'block';
-            noMoreMasteries.innerHTML = `<span style="color: #9791c5; font-weight: 700">${SUMMONER_NAME}</span> doesn't have champion masteries.`;
+            setTimeout(() => {
+                loadingSummonerInfo.style.display = 'none';
+                championMastery.style.display = 'block';
+                moreMasteries.style.display = 'grid';
+                moreMasteries.classList.add('no-more-masteries-display');
+                noMoreMasteries.style.display = 'block';
+                noMoreMasteries.innerHTML = `<span style="color: #9791c5; font-weight: 700">${SUMMONER_NAME}</span> doesn't have champion masteries.`;
+            }, 300);
             return;
         }
         console.log('CHAMPION MASTERY:');
@@ -541,7 +547,7 @@ async function fetchMatchHistory() {
         resetSummonerInfo();
         resetMatchHistory();
         buttonMatchHistory.style.backgroundColor = 'rgba(93, 84, 164, 0.5)';
-        setTimeout(() => loadingSummonerInfo.style.display = 'block', 100);
+        loadingSummonerInfo.style.display = 'block';
         const options = {
             method: 'POST',
             headers: {
@@ -549,20 +555,22 @@ async function fetchMatchHistory() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                account_id: ACCOUNT_ID
+                accountId: ACCOUNT_ID
             })
         }
         const response = await fetch('/match-history', options);
         const data = await response.json();
-        if (data === 'Unable to fetch data from the Match History API') {
-            loadingSummonerInfo.style.display = 'none';
-            notifyError.style.display = 'block';
-            errorDescription.innerHTML = `
-            We were unable to fetch and display the information that you've requested. <br> <br>
-            <span style="font-weight: 700">This might be because:</span> <br>
-            <span style="padding-right: 2px">&#128900;</span> Summoner hasn't played any matches <br>
-            <span style="padding-right: 2px">&#128900;</span> Summoner is in a long period of inactivity
-            `;
+        if (data[0] === 'Error') {
+            setTimeout(() => {
+                loadingSummonerInfo.style.display = 'none';
+                notifyError.style.display = 'block';
+                errorDescription.innerHTML = `
+                We were unable to fetch and display the information that you've requested. <br> <br>
+                <span style="font-weight: 700">This might be because:</span> <br>
+                <span style="padding-right: 2px">&#128900;</span> Summoner hasn't played any matches <br>
+                <span style="padding-right: 2px">&#128900;</span> Summoner is in a long period of inactivity
+                `;
+            }, 300);
             return;
         }
         console.log(data);
@@ -589,7 +597,7 @@ async function fetchMatches(startIndex, endIndex) {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    match_id: MATCHES_ID[i]
+                    matchId: MATCHES_ID[i]
                 })
             };
             const response = await fetch('/match', options);

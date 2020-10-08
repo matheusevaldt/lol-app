@@ -1,11 +1,9 @@
-*, *::before, *::after{
+*, 
+*::before, 
+*::after {
     padding: 0;
     margin: 0;
     box-sizing: border-box;
-}
-
-button {
-    cursor: pointer;
 }
 
 *:focus {
@@ -21,8 +19,16 @@ button {
     -webkit-tap-highlight-color: transparent;
 }
 
-ul {
-    list-style: none;
+:root {
+    --main-purple-color: #5d54a4;
+    --loading-border: 4px solid rgba(37, 28, 119, 0.3);
+    --loading-border-top: 4px solid rgba(37, 28, 119, 1);
+    --white-medium-opacity: rgba(255, 255, 255, 0.6);
+    --white-low-opacity: rgba(255, 255, 255, 0.4);
+}
+
+button {
+    cursor: pointer;
 }
 
 body {
@@ -32,7 +38,7 @@ body {
 }
 
 header {
-    background-color: #5d54a4;
+    background-color: var(--main-purple-color);
     padding: 40px 10px 55px 10px;
     text-align: center;
     border-bottom-left-radius: 50%;
@@ -53,7 +59,7 @@ header h2 {
     padding: 0 20px;
 }
 
-.search-and-overview-summoner {
+.search-and-overview-summoner { /* Container to search summoner and display the summoner's overview */
     position: relative;
     top: -25px;
     padding: 0 5%;
@@ -62,8 +68,8 @@ header h2 {
 .loading-search-summoner {
     display: none;
     margin: 0 auto;
-    border: 4px solid rgba(37, 28, 119, 0.3);
-    border-top: 4px solid rgba(37, 28, 119, 1);
+    border: var(--loading-border);
+    border-top: var(--loading-border-top);
     border-radius: 50%;
     width: 28px;
     height: 28px;
@@ -131,25 +137,19 @@ header h2 {
 }
 
 .button-search-summoner-enabled {
-    background-color: #5d54a4;
+    background-color: var(--main-purple-color);
     cursor: pointer;
 }
 
 .overview-summoner {
-    position: relative;
     display: none;
+    position: relative;
 }
 
 .overview-info {
     display: flex;
     align-items: center;
     margin: 0 auto;
-}
-
-.overview-name {
-    font-size: 1em;
-    color: #fff;
-    font-weight: 700;
 }
 
 .overview-icon-and-level {
@@ -175,7 +175,13 @@ header h2 {
     font-weight: 700;
     font-size: 0.8em;
     border-radius: 10px;
-    color: #5d54a4;
+    color: var(--main-purple-color);
+}
+
+.overview-name {
+    font-size: 1em;
+    color: #fff;
+    font-weight: 700;
 }
 
 .overview-server {
@@ -190,13 +196,18 @@ header h2 {
     transform: translateY(-50%);
     background-color: transparent;
     border: none;
+    transition: opacity 0.3s linear;
+}
+
+.button-return-to-search-summoner:hover {
+    opacity: 0.7;
 }
 
 .button-return-to-search-summoner img {
     width: 32px;
 }
 
-.summoner-info {
+.summoner-info { /* Main container - where the summoner's info can be found: ranked, mastery, match history */
     display: none;
     position: relative;
     margin-top: 5px;
@@ -238,8 +249,8 @@ header h2 {
     left: 0;
     right: 0;
     margin: 0 auto;
-    border: 4px solid rgba(37, 28, 119, 0.3);
-    border-top: 4px solid rgba(37, 28, 119, 1);
+    border: var(--loading-border);
+    border-top: var(--loading-border-top);
     border-radius: 50%;
     width: 28px;
     height: 28px;
@@ -254,12 +265,17 @@ header h2 {
 .buttons button {
     padding: 15px 0;
     border: none;
-    background-color: #5d54a4;
+    background-color: var(--main-purple-color);
     color: #fff;
     font-weight: 700;
+    transition: background-color 0.3s linear;
 }
-/*  */
-.ranked {
+
+.buttons button:hover {
+    background-color: rgba(93, 84, 164, 0.5) !important;
+}
+
+.ranked { /* Styling the ranked section */
     display: none;
     flex-direction: column;
     margin-top: 15px;
@@ -305,7 +321,7 @@ header h2 {
     margin-top: 2px;
 }
 
-.champion-mastery {
+.champion-mastery { /* Styling the champion mastery section */
     display: none;
     margin-top: 15px;
 }
@@ -316,7 +332,6 @@ header h2 {
     flex-direction: column;
     width: 90%;
     margin: 15px auto;
-    /* padding: 0; */
     border-radius: 5px;
     background-image: linear-gradient(to right,#27215a , #342d80);
 }
@@ -343,7 +358,7 @@ header h2 {
 }
 
 .champion-mastery-rank {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--white-medium-opacity);
 }
 
 .champion-image {
@@ -354,7 +369,7 @@ header h2 {
     width: 64px;
     border-radius: 50%;
     border: 4px solid rgba(14, 3, 46, 0.7);
-    box-shadow: 0 0 5px #5d54a4;
+    box-shadow: 0 0 5px var(--main-purple-color);
     margin-top: 4px;
 }
 
@@ -370,7 +385,7 @@ header h2 {
 
 .champion-title {
     font-size: 0.85em;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--white-medium-opacity);
 }
 
 .champion-mastery-points {
@@ -392,7 +407,7 @@ header h2 {
 }
 
 .champion-last-played {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--white-medium-opacity);
 }
 
 .more-masteries {
@@ -400,7 +415,6 @@ header h2 {
     grid-template-areas: "show-more-masteries";
     width: 90%;
     height: 40px;
-    /* margin: 20px 5%; */
     margin: 20px auto;
     text-align: center;
 }
@@ -413,8 +427,13 @@ header h2 {
     font-weight: 700;
     background-color: transparent;
     color: #dbdbdb;
-    border: 1px solid  rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
+    transition: border-color 0.3s linear;
+}
+
+.button-load-more-masteries:hover {
+    border-color: rgba(255, 255, 255, 1);
 }
 
 .loading-more-masteries {
@@ -423,14 +442,13 @@ header h2 {
     left: 0;
     right: 0;
     margin: auto;
-    border: 4px solid rgba(37, 28, 119, 0.3);
-    border-top: 4px solid rgba(37, 28, 119, 1);
+    border: var(--loading-border);
+    border-top: var(--loading-border-top);
     border-radius: 50%;
     width: 28px;
     height: 28px;
     animation: loading-spinner 1.2s linear infinite;
 }
-
 
 .no-more-masteries {
     grid-area: no-more-masteries;
@@ -449,14 +467,7 @@ header h2 {
     grid-template-areas: "no-more-masteries";
 }
 
-
-/**/
-
-
-
-
-
-.match-history {
+.match-history { /* Styling the match history */
     display: none;
     margin-top: 15px;
 }
@@ -467,8 +478,6 @@ header h2 {
     margin: 15px auto;
     padding: 5px 5px;
     border-radius: 5px;
-    /* background-image: linear-gradient(to right, rgba(26, 160, 97, 0.4), rgba(26, 160, 97, 0.3), rgba(26, 160, 97, 0.2)); */
-    /* background-image: linear-gradient(to right, rgba(160, 26, 55, 0.4), rgba(160, 26, 55, 0.3), rgba(160, 26, 55, 0.2)); */
 }
 
 .match:first-of-type {
@@ -476,7 +485,6 @@ header h2 {
 }
 
 .match-header {
-    /* border: 1px solid red; */
     font-size: 0.85em;
     padding-bottom: 6px;
     margin-bottom: 6px;
@@ -486,7 +494,7 @@ header h2 {
 .match-date-duration {
     display: flex;
     align-items: center;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--white-medium-opacity);
 }
 
 .match-duration {
@@ -495,7 +503,6 @@ header h2 {
 }
 
 .match-info {
-    /* border: 1px solid #fff; */
     display: flex;
     align-items: center;
 }
@@ -554,7 +561,7 @@ header h2 {
 }
 
 .match-info-span {
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--white-low-opacity);
     font-weight: 400;
 }
 
@@ -601,7 +608,6 @@ header h2 {
 }
 
 .match-items {
-    /* border: 1px solid red; */
     display: grid;
     grid-template-areas: "item0 item1 item2 ."
                          "item3 item4 item5 item6";
@@ -611,7 +617,7 @@ header h2 {
 .item-build {
     width: 30px;
     height: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid var(--white-low-opacity);
     border-radius: 5px;
 }
 
@@ -665,7 +671,6 @@ header h2 {
 }
 
 .match-blue-team {
-    /* border: 1px solid red; */
     display: flex;
 }
 
@@ -684,16 +689,11 @@ header h2 {
     display: flex;
 }
 
-
-
-
-
 .more-matches {
     grid-template-areas: "show-more";
     display: none;
     height: 40px;
     width: 90%;
-    /* margin: 2px 5% 20px 5%; */
     margin: 2px auto 20px auto;
     text-align: center;
 }
@@ -708,6 +708,11 @@ header h2 {
     color: #dbdbdb;
     border: 1px solid  rgba(255, 255, 255, 0.2);
     border-radius: 8px;
+    transition: border-color 0.3s linear;
+}
+
+.button-load-more-matches:hover {
+    border-color: rgba(255, 255, 255, 1);
 }
 
 .loading-more-matches {
@@ -716,8 +721,8 @@ header h2 {
     left: 0;
     right: 0;
     margin: auto;
-    border: 4px solid rgba(37, 28, 119, 0.3);
-    border-top: 4px solid rgba(37, 28, 119, 1);
+    border: var(--loading-border);
+    border-top: var(--loading-border-top);
     border-radius: 50%;
     width: 28px;
     height: 28px;
@@ -741,7 +746,7 @@ header h2 {
     grid-template-areas: "no-more-matches";
 }
 
-.button-scroll-to-top {
+.button-scroll-to-top { /* Styling the button that scrolls to the top of the document */
     display: none;
     background-color: transparent;
     border: none;
@@ -760,11 +765,6 @@ header h2 {
 .button-scroll-to-top:focus > .scroll-to-top-image {
     opacity: 1;
 }
-
-
-
-
-
 
 /* MEDIA QUERIES */
 @media (min-width: 520px) {
@@ -863,10 +863,3 @@ header h2 {
     }
 
 }
-
-/* 
-    ['Error', err.message'] in mastery and match history
-    do the same like it is in ranked
-
-    remove setTimeout loadingSummonerInfo when fetching mastery and match history also
-*/

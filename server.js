@@ -40,7 +40,7 @@ app.post('/ranked', async (request, response) => {
         const rankedData = await rankedResponse.json();
         response.json(rankedData);
     } catch (err) {
-        console.log(`This is the error: ${err.message}`);
+        console.log(`Error in RANKED: ${err.message}`);
         response.json(['Error', err.message]);
     }
 });
@@ -53,30 +53,30 @@ app.post('/champion-mastery', async (request, response) => {
         const masteryData = await masteryResponse.json();
         response.json(masteryData);
     } catch (err) {
-        console.log(`ERRO: ${err.message}`);
-        response.json(err.message);
+        console.log(`Error in CHAMPION MASTERY: ${err.message}`);
+        response.json(['Error', err.message]);
     }
 });
 
 app.post('/match-history', async (request, response) => {
     try {
-        const matchHistoryURL = `https://${REGION}.api.riotgames.com/lol/match/v4/matchlists/by-account/${request.body.account_id}?api_key=${LEAGUEOFLEGENDS_API_KEY}`;
+        const matchHistoryURL = `https://${REGION}.api.riotgames.com/lol/match/v4/matchlists/by-account/${request.body.accountId}?api_key=${LEAGUEOFLEGENDS_API_KEY}`;
         const matchHistoryResponse = await fetch(matchHistoryURL);
         const matchHistoryData = await matchHistoryResponse.json();
         if (!matchHistoryResponse.ok) throw new Error('Unable to fetch data from the Match History API');
         response.json(matchHistoryData);
     } catch (err) {
-        console.log(err.message);
-        response.json(err.message)
+        console.log(`Error in MATCH HISTORY: ${err.message}`);
+        response.json(['Error', err.message]);
     }
 });
 
 app.post('/match', async (request, response) => {
     try {
-        const matchURL = `https://${REGION}.api.riotgames.com/lol/match/v4/matches/${request.body.match_id}?api_key=${LEAGUEOFLEGENDS_API_KEY}`;
+        const matchURL = `https://${REGION}.api.riotgames.com/lol/match/v4/matches/${request.body.matchId}?api_key=${LEAGUEOFLEGENDS_API_KEY}`;
         const matchResponse = await fetch(matchURL);
         const matchData = await matchResponse.json();
-        if (!matchResponse.ok) throw new Error(`Unable to fetch data from the match ${request.body.match_id}`);
+        if (!matchResponse.ok) throw new Error(`Unable to fetch data from the match ${request.body.matchId}`);
         response.json(matchData);
     } catch (err) {
         console.log(err.message);

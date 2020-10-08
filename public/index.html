@@ -13,25 +13,18 @@
 
     <header>
         <h1>League of Legends App</h1>
-        <h2>We provide information for all summoners in every region.</h2>
+        <h2>We provide information for all summoners in Runeterra.</h2>
     </header>
 
     <div class="search-and-overview-summoner">
         <div class="loading-search-summoner"></div>
         <form class="search-summoner">
-            <!-- 
-                andrewiston
-                yodlnha raiz 1v9
-                Plankgang
-                DanLuca
-                xBlackLabelSx
-             -->
-            <input type="text" class="input-search-summoner" placeholder="Summoner's name" value="Solarbacc">
+            <input type="text" class="input-search-summoner" placeholder="Summoner's name">
             <select class="summoner-region" id="region">
-                <option value="br1">Brazil</option>
+                <option value="br1" selected>Brazil</option>
                 <option value="eun1">Europe Nordic & East</option>
                 <option value="euw1">Europe West</option>
-                <option value="na1" selected>North America</option>
+                <option value="na1">North America</option>
                 <option value="kr">South Korea</option>
                 <option value="jp1">Japan</option>
                 <option value="la1">Latin America North</option>
@@ -39,8 +32,8 @@
                 <option value="oc1">Oceania</option>
                 <option value="tr1">Russia</option>
                 <option value="ru">Turkey</option>
-              </select>
-              <input type="submit" class="button-search-summoner" value="Search">
+            </select>
+            <input type="submit" class="button-search-summoner" value="Search">
         </form>
         <div class="overview-summoner">
             <div class="overview-info">
@@ -53,7 +46,9 @@
                     <p class="overview-server"></p>
                 </div>
             </div>
-            <button class="button-return-to-search-summoner"><img src="images/return-to-search.png"></button>
+            <button class="button-return-to-search-summoner">
+                <img src="images/return-to-search.png">
+            </button>
         </div>
     </div>
 
@@ -69,7 +64,7 @@
             <button class="button-champion-mastery">Masteries</button>
             <button class="button-match-history">Match History</button>
         </div>
-        <div class="ranked">
+        <section class="ranked">
             <div class="ranked-solo">
                 <div class="ranked-solo-emblem"></div>
                 <div class="ranked-solo-info">
@@ -84,24 +79,26 @@
                     <p class="ranked-flex-league-points-win-rate"></p>
                 </div>
             </div>
-        </div>
-        <div class="champion-mastery">
+        </section>
+        <section class="champion-mastery">
             <div class="more-masteries">
                 <div class="loading-more-masteries"></div>
                 <button class="button-load-more-masteries">Show more</button>
                 <div class="no-more-masteries"></div>
             </div>
-        </div>
-        <div class="match-history">
+        </section>
+        <section class="match-history">
             <div class="more-matches">
                 <div class="loading-more-matches"></div>
                 <button class="button-load-more-matches">Show more</button>
                 <div class="no-more-matches"></div>
             </div>
-        </div>
+        </section>
     </main>
 
-    <button class="button-scroll-to-top"><img src="images/scroll-to-top.png" class="scroll-to-top-image"></button>
+    <button class="button-scroll-to-top">
+        <img src="images/scroll-to-top.png" class="scroll-to-top-image">
+    </button>
 
 </body>
 </html>
