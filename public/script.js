@@ -1,3 +1,4 @@
+// Global variables.
 const searchSummoner = document.querySelector('.search-summoner');
 const overviewSummoner = document.querySelector('.overview-summoner');
 const inputSearchSummoner = document.querySelector('.input-search-summoner');
@@ -5,29 +6,15 @@ const buttonSearchSummoner = document.querySelector('.button-search-summoner');
 const summonerRegion = document.querySelector('.summoner-region');
 const loadingSearchSummoner = document.querySelector('.loading-search-summoner');
 const buttonReturnToSearchSummoner = document.querySelector('.button-return-to-search-summoner');
-
-let ACCOUNT_ID;
-let SUMMONER_ID;
-let SUMMONER_NAME;
-let CURRENT_VERSION;
-let CHAMPIONS_DATA;
-let SPELLS_DATA;
-let RUNES_DATA;
-let QUEUE_DATA;
-let arrayMatches = [];
-
-const notifyError = document.querySelector('.notify-error');
-const errorDescription = document.querySelector('.error-description');
-
+const summonerInfo = document.querySelector('.summoner-info');
+const loadingSummonerInfo = document.querySelector('.loading-summoner-info');
 const buttons = document.querySelector('.buttons');
 const buttonRanked = document.querySelector('.button-ranked');
 const buttonChampionMastery = document.querySelector('.button-champion-mastery');
 const buttonMatchHistory = document.querySelector('.button-match-history');
-
 const ranked = document.querySelector('.ranked');
 const championMastery = document.querySelector('.champion-mastery');
 const matchHistory = document.querySelector('.match-history');
-
 const rankedSolo = document.querySelector('.ranked-solo');
 const rankedFlex = document.querySelector('.ranked-flex');
 const rankedSoloEmblem = document.querySelector('.ranked-solo-emblem');
@@ -36,10 +23,42 @@ const rankedSoloElo = document.querySelector('.ranked-solo-elo');
 const rankedFlexElo = document.querySelector('.ranked-flex-elo');
 const rankedSoloLeaguePointsWinRate = document.querySelector('.ranked-solo-league-points-win-rate');
 const rankedFlexLeaguePointsWinRate = document.querySelector('.ranked-flex-league-points-win-rate');
+const moreMasteries = document.querySelector('.more-masteries');
+const loadingMoreMasteries = document.querySelector('.loading-more-masteries');
+const buttonLoadMoreMasteries = document.querySelector('.button-load-more-masteries');
+const noMoreMasteries = document.querySelector('.no-more-masteries');
+const moreMatches = document.querySelector('.more-matches');
+const loadingMoreMatches = document.querySelector('.loading-more-matches');
+const buttonLoadMoreMatches = document.querySelector('.button-load-more-matches');
+const noMoreMatches = document.querySelector('.no-more-matches');
+const notifyError = document.querySelector('.notify-error');
+const errorDescription = document.querySelector('.error-description');
+const buttonScrollToTop = document.querySelector('.button-scroll-to-top');
+const scrollToTopImage = document.querySelector('.scroll-to-top-image');
+let ACCOUNT_ID;
+let SUMMONER_ID;
+let SUMMONER_NAME;
+let CURRENT_VERSION;
+let CHAMPIONS_DATA;
+let SPELLS_DATA; 
+let RUNES_DATA;
+let QUEUES_DATA;
+let CHAMPION_MASTERY;
+let CHAMPION_MASTERY_RANK;
+let MASTERIES_START_INDEX;
+let MASTERIES_END_INDEX;
+let MASTERIES_COUNT;
+let MATCH_HISTORY;
+let MATCHES_START_INDEX;
+let MATCHES_END_INDEX;
+let MATCHES_COUNT;
+let arrayMatches = [];
+let arrayChampionMastery = [];
+let errorInFunction = 'background-color: #d7385e; color: #fff;';
 
-const summonerInfo = document.querySelector('.summoner-info');
-const loadingSummonerInfo = document.querySelector('.loading-summoner-info');
+buttonSearchSummoner.disabled = true;
 
+// Event listeners.
 inputSearchSummoner.addEventListener('input', statusButtonSearchSummoner);
 buttonSearchSummoner.addEventListener('click', event => event.preventDefault());
 buttonSearchSummoner.addEventListener('click', fetchSummonerData);
@@ -48,8 +67,7 @@ buttonChampionMastery.addEventListener('click', fetchChampionMastery);
 buttonMatchHistory.addEventListener('click', fetchMatchHistory);
 buttonReturnToSearchSummoner.addEventListener('click', returnToSearchSummoner);
 
-buttonSearchSummoner.disabled = true;
-
+// Fetching the API's current version when the document is loaded.
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', fetchCurrentVersion);
 } else {
@@ -58,13 +76,13 @@ if (document.readyState === 'loading') {
 
 async function fetchCurrentVersion() {
     try {
-        const championsURL = 'https://ddragon.leagueoflegends.com/api/versions.json';
-        const championsResponse = await fetch(championsURL);
-        const championsData = await championsResponse.json();
-        CURRENT_VERSION = championsData[0];
+        const versionURL = 'https://ddragon.leagueoflegends.com/api/versions.json';
+        const versionResponse = await fetch(versionURL);
+        const versionData = await versionResponse.json();
+        CURRENT_VERSION = versionData[0];
         console.log(`Version: ${CURRENT_VERSION}`);
     } catch (err) {
-        console.log('Error in function: fetchCurrentVersion');
+        console.log('Error in function %cfetchCurrentVersion', errorInFunction);
         console.error(err);
     }
 }
@@ -79,6 +97,8 @@ function statusButtonSearchSummoner() {
     }
 }
 
+// Fetching data from the summoner that the user has inserted.
+// Fetching data from the API regarding champions, spells, runes and queues. 
 async function fetchSummonerData() {
     try {
         searchSummoner.style.display = 'none';
@@ -99,10 +119,9 @@ async function fetchSummonerData() {
                 region: region
             })
         };
-        const response = await fetch('/', options);
-        const data = await response.json();
-        console.log(data);
-        if (data[0] === 'Error') {
+        const summonerResponse = await fetch('/', options);
+        const summonerData = await summonerResponse.json();
+        if (summonerData[0] === 'Error') {
             setTimeout(() => {
                 loadingSearchSummoner.style.display = 'none';
                 searchSummoner.style.display = 'grid';
@@ -110,7 +129,7 @@ async function fetchSummonerData() {
                 buttons.style.display = 'none';
                 notifyError.style.display = 'block';
                 inputSearchSummoner.value = '';
-                if (data[1] === '404') {
+                if (summonerData[1] === '404') {
                     errorDescription.innerHTML = `
                     Summoner hasn't been found. <br>
                     Verify if you've correctly inserted both the summoner's name and region.
@@ -121,24 +140,24 @@ async function fetchSummonerData() {
             }, 300);
             return;
         }
-        console.log('SUMMONER DATA:');
-        console.log(data);
-        ACCOUNT_ID = data.accountId;
-        SUMMONER_ID = data.id;
-        SUMMONER_NAME = data.name;
-        await displaySummonerOverview(data, server);
+        ACCOUNT_ID = summonerData.accountId;
+        SUMMONER_ID = summonerData.id;
+        SUMMONER_NAME = summonerData.name;
+        await displaySummonerOverview(summonerData, server);
         const championsData = await fetchChampionsData();
         const spellsData = await fetchSpellsData();
         const runesData = await fetchRunesData();
-        const queueData = await fetchQueueData();
-        const dataFetched = await Promise.all([championsData, spellsData, runesData, queueData]);
-        return dataFetched;
+        const queuesData = await fetchQueuesData();
+        const necessaryData = await Promise.all([championsData, spellsData, runesData, queuesData]);
+        return necessaryData;
     } catch (err) {
-        console.log('There has been an error.');
+        console.log('Error in function %cfetchSummonerData', errorInFunction);
         console.error(err);
     }
 }
 
+// Displaying an overview of the summoner that the user has inserted.
+// Displaying the buttons where the user can look into more information about the summoner.
 async function displaySummonerOverview(data, server) {
     loadingSearchSummoner.style.display = 'none';
     overviewSummoner.style.display = 'block';
@@ -160,10 +179,8 @@ async function fetchChampionsData() {
         const championsResponse = await fetch(championsURL);
         const championsData = await championsResponse.json();
         CHAMPIONS_DATA = championsData.data;
-        console.log('CHAMPIONS DATA:')
-        console.log(CHAMPIONS_DATA);
     } catch (err) {
-        console.log('Error in function: fetchChampionsData');
+        console.log('Error in function %cfetchChampionsData', errorInFunction);
         console.error(err);
     }
 }
@@ -174,10 +191,8 @@ async function fetchSpellsData() {
         const spellsResponse = await fetch(spellsURL);
         const spellsData = await spellsResponse.json();
         SPELLS_DATA = spellsData.data;
-        console.log('SPELLS DATA:');
-        console.log(SPELLS_DATA);
     } catch (err) {
-        console.log('Error in function: fetchSpellsData');
+        console.log('Error in function %cfetchSpellsData', errorInFunction);
         console.error(err);
     }
 }
@@ -188,24 +203,20 @@ async function fetchRunesData() {
         const runesResponse = await fetch(runesURL);
         const runesData = await runesResponse.json();
         RUNES_DATA = runesData;
-        console.log('RUNES DATA:');
-        console.log(RUNES_DATA);
     } catch (err) {
-        console.log('Error in function: fetchRunesData');
+        console.log('Error in function %cfetchRunesData', errorInFunction);
         console.error(err);
     }
 }
 
-async function fetchQueueData() {
+async function fetchQueuesData() {
     try {
-        const queueURL = 'https://static.developer.riotgames.com/docs/lol/queues.json';
-        const queueResponse = await fetch(queueURL);
-        const queueData = await queueResponse.json();
-        console.log('QUEUE DATA');
-        console.log(queueData);
-        QUEUE_DATA = queueData;
+        const queuesURL = 'https://static.developer.riotgames.com/docs/lol/queues.json';
+        const queuesResponse = await fetch(queuesURL);
+        const queuesData = await queuesResponse.json();
+        QUEUES_DATA = queuesData;
     } catch (err) {
-        console.log('Error in function: fetchQueueData');
+        console.log('Error in function %cfetchQueuesData', errorInFunction);
         console.error(err);
     }
 }
@@ -224,6 +235,20 @@ function resetSummonerInfo() {
     errorDescription.innerHTML = '';
 }
 
+function returnToSearchSummoner() {
+    inputSearchSummoner.value = '';
+    searchSummoner.style.display = 'grid';
+    overviewSummoner.style.display = 'none';
+    summonerInfo.style.display = 'none';
+    ranked.style.display = 'none';
+    championMastery.style.display = 'none';
+    matchHistory.style.display = 'none';
+    buttonSearchSummoner.disabled = true;
+    buttonSearchSummoner.classList.remove('button-search-summoner-enabled');
+    resetButtonsBackgroundColor();
+}
+
+// Fetching ranked data from the summoner that the user has inserted.
 async function fetchRankedData() {
     try {
         resetButtonsBackgroundColor();
@@ -251,15 +276,14 @@ async function fetchRankedData() {
             }, 300);
             return;
         }
-        console.log('SUMMONER RANKED DATA:');
-        console.log(data);
         await displayRanked(data);
     } catch (err) {
-        console.log('Error in function: fetchSummonerRankedData');
+        console.log('Error in function %cfetchSummonerRankedData', errorInFunction);
         console.error(err);
     }
 }
 
+// Displaying the ranked data in the document.
 async function displayRanked(data) {
     loadingSummonerInfo.style.display = 'none';
     ranked.style.display = 'flex';
@@ -280,13 +304,14 @@ async function displayRanked(data) {
             const getRankedSoloWinRate = () => {
                 let winRate = (((queue.wins) / (queue.wins + queue.losses)) * 100).toFixed(1);
                 RANKED_SOLO_WIN_RATE_COLOR = winRate < 50 ? '#fe346e' : '#43d8c9';
-                if (winRate.charAt(winRate.length - 1) === '0') {
-                    winRate = winRate.slice(0, winRate.length - 2);
-                }
+                if (winRate.charAt(winRate.length - 1) === '0') winRate = winRate.slice(0, winRate.length - 2);
                 return winRate;
             };
-            getRankedSoloWinRate();
-            rankedSoloLeaguePointsWinRate.innerHTML = `${queue.leaguePoints} LP <span style="color: #d4d4d4; padding: 0 3px">&#128900;</span> <span style="color: #a289b6"> ${queue.wins} W – ${queue.losses} L</span> <span style="color: #d4d4d4; padding: 0 3px">&#128900;</span> <span style="color: ${RANKED_SOLO_WIN_RATE_COLOR}">${getRankedSoloWinRate()}%</span>`;
+            rankedSoloLeaguePointsWinRate.innerHTML = `
+            ${queue.leaguePoints} LP <span style="color: #d4d4d4; padding: 0 3px">&#128900;</span> 
+            <span style="color: #a289b6"> ${queue.wins} W – ${queue.losses} L</span> <span style="color: #d4d4d4; padding: 0 3px">&#128900;</span> 
+            <span style="color: ${RANKED_SOLO_WIN_RATE_COLOR}">${getRankedSoloWinRate()}%</span>
+            `;
             getRankedEmblem(queue.tier, rankedSoloEmblem);
         }
         if (queue.queueType === 'RANKED_FLEX_SR') {
@@ -305,13 +330,14 @@ async function displayRanked(data) {
             const getRankedFlexWinRate = () => {
                 let winRate = (((queue.wins) / (queue.wins + queue.losses)) * 100).toFixed(1);
                 RANKED_FLEX_WIN_RATE_COLOR = winRate < 50 ? '#fe346e' : '#43d8c9';
-                if (winRate.charAt(winRate.length - 1) === '0') {
-                    winRate = winRate.slice(0, winRate.length - 2);
-                }
+                if (winRate.charAt(winRate.length - 1) === '0') winRate = winRate.slice(0, winRate.length - 2);
                 return winRate;
             };
-            getRankedFlexWinRate();
-            rankedFlexLeaguePointsWinRate.innerHTML = `${queue.leaguePoints} LP <span style="color: #d4d4d4; padding: 0 3px">&#128900;</span> <span style="color: #a289b6"> ${queue.wins} W – ${queue.losses} L</span> <span style="color: #d4d4d4; padding: 0 3px">&#128900;</span> <span style="color: ${RANKED_FLEX_WIN_RATE_COLOR}">${getRankedFlexWinRate()}%</span>`;
+            rankedFlexLeaguePointsWinRate.innerHTML = `
+            ${queue.leaguePoints} LP <span style="color: #d4d4d4; padding: 0 3px">&#128900;</span> 
+            <span style="color: #a289b6"> ${queue.wins} W – ${queue.losses} L</span> <span style="color: #d4d4d4; padding: 0 3px">&#128900;</span> 
+            <span style="color: ${RANKED_FLEX_WIN_RATE_COLOR}">${getRankedFlexWinRate()}%</span>
+            `;
             getRankedEmblem(queue.tier, rankedFlexEmblem);
         }
     });
@@ -342,15 +368,7 @@ function getRankedEmblem(id, where) {
     return where.innerHTML = emblems[id] || emblems.default;
 }
 
-
-// CHAMPION MASTERY
-let arrayChampionMastery = [];
-let CHAMPION_MASTERY, CHAMPION_MASTERY_RANK, MASTERIES_START_INDEX, MASTERIES_END_INDEX, MASTERIES_COUNT;
-const moreMasteries = document.querySelector('.more-masteries');
-const loadingMoreMasteries = document.querySelector('.loading-more-masteries');
-const buttonLoadMoreMasteries = document.querySelector('.button-load-more-masteries');
-const noMoreMasteries = document.querySelector('.no-more-masteries');
-
+// Fetching champion mastery data from the summoner that the user has inserted.
 async function fetchChampionMastery() {
     try {
         resetButtonsBackgroundColor();
@@ -368,9 +386,9 @@ async function fetchChampionMastery() {
                 summonerId: SUMMONER_ID
             })
         };
-        const response = await fetch('/champion-mastery', options);
-        const data = await response.json();
-        if (data[0] === 'Error') {
+        const championMasteryResponse = await fetch('/champion-mastery', options);
+        const championMasteryData = await championMasteryResponse.json();
+        if (championMasteryData[0] === 'Error') {
             setTimeout(() => {
                 console.log('aa');
                 loadingSummonerInfo.style.display = 'none';
@@ -379,7 +397,7 @@ async function fetchChampionMastery() {
             }, 300);
             return;
         }
-        if (data.length === 0) {
+        if (championMasteryData.length === 0) {
             setTimeout(() => {
                 loadingSummonerInfo.style.display = 'none';
                 championMastery.style.display = 'block';
@@ -390,23 +408,24 @@ async function fetchChampionMastery() {
             }, 300);
             return;
         }
-        console.log('CHAMPION MASTERY:');
-        console.log(data);
-        CHAMPION_MASTERY = data;
-        await assembleChampionMastery(CHAMPION_MASTERY, MASTERIES_START_INDEX, MASTERIES_END_INDEX);
+        CHAMPION_MASTERY = championMasteryData;
+        await assembleChampionMastery(MASTERIES_START_INDEX, MASTERIES_END_INDEX);
         displayChampionMastery();
     } catch (err) {
-        console.log('Error in function: fetchChampionMastery');
+        console.log('Error in function %cfetchChampionMastery', errorInFunction);
         console.error(err);
     }
 }
 
-async function assembleChampionMastery(championMasteryData, startIndex, endIndex) {
-    const summonerChampions = championMasteryData.slice(startIndex, endIndex);
+// Getting the champion mastery data from an amount of champions.
+// Creating a container for each champion selected.
+// The data for each champion will be displayed inside the container created.
+// Each container created will be stored in an array.
+async function assembleChampionMastery(startIndex, endIndex) {
+    const summonerChampions = CHAMPION_MASTERY.slice(startIndex, endIndex);
     summonerChampions.forEach(champion => {
         for (let i in CHAMPIONS_DATA) {
             if (CHAMPIONS_DATA[i].key == champion.championId) {
-
                 const div = document.createElement('div');
                 const divChampionMasteryHeader = document.createElement('div');
                 const divChampionMasteryMain = document.createElement('div');
@@ -420,7 +439,6 @@ async function assembleChampionMastery(championMasteryData, startIndex, endIndex
                 const divChampionMasteryAndPoints = document.createElement('div'); 
                 const championPoints = document.createElement('p');
                 const championLastPlayed = document.createElement('p');
-
                 div.className = 'champion';
                 divChampionMasteryHeader.className = 'champion-mastery-header';
                 divChampionMasteryMain.className = 'champion-mastery-main';
@@ -462,9 +480,7 @@ async function assembleChampionMastery(championMasteryData, startIndex, endIndex
                 div.appendChild(divChampionMasteryMain);
                 div.appendChild(divChampionMasteryFooter);
                 arrayChampionMastery.push(div);
-
                 MASTERIES_COUNT++;
-
             }
         }
     });
@@ -484,6 +500,41 @@ function getMasteryFlair(id, where) {
     return where.innerHTML = masteries[id] || emblems.default;
 }
 
+// After the containers have been created and stored in the array, display all of them in the document.
+function displayChampionMastery() {
+    loadingSummonerInfo.style.display = 'none';
+    championMastery.style.display = 'block';
+    arrayChampionMastery.forEach(mastery => championMastery.insertAdjacentElement('beforeend', mastery));
+    arrayChampionMastery = [];
+    manageMoreMasteries();
+}
+
+// Displaying more champion masteries.
+buttonLoadMoreMasteries.addEventListener('click', () => {
+    buttonLoadMoreMasteries.style.display = 'none';
+    moreMasteries.classList.add('more-masteries-loading');
+    loadingMoreMasteries.style.display = 'block';
+    assembleChampionMastery(MASTERIES_START_INDEX, MASTERIES_END_INDEX);
+    setTimeout(() => displayChampionMastery(), 700);
+});
+
+// Displaying the button 'Show more' while there are still champions in the CHAMPION_MASTERY variable.
+function manageMoreMasteries() {
+    championMastery.insertAdjacentElement('beforeend', moreMasteries);
+    moreMasteries.style.display = 'grid';
+    moreMasteries.classList.remove('more-masteries-loading');
+    loadingMoreMasteries.style.display = 'none';
+    if (MASTERIES_COUNT >= CHAMPION_MASTERY.length) {
+        moreMasteries.classList.add('no-more-masteries-display');
+        noMoreMasteries.style.display = 'block';
+        noMoreMasteries.innerHTML = `<span style="color: #9791c5; font-weight: 700">${SUMMONER_NAME}</span> doesn't have more masteries.`;
+    } else {
+        MASTERIES_START_INDEX += 5;
+        MASTERIES_END_INDEX += 5;
+        buttonLoadMoreMasteries.style.display = 'block';
+    }
+}
+
 function resetChampionMastery() {
     const champions = document.querySelectorAll('.champion');
     const arrayChampions = [...champions];
@@ -501,46 +552,7 @@ function resetChampionMastery() {
     moreMasteries.classList.remove('more-masteries-loading');
 }
 
-buttonLoadMoreMasteries.addEventListener('click', () => {
-    buttonLoadMoreMasteries.style.display = 'none';
-    moreMasteries.classList.add('more-masteries-loading');
-    loadingMoreMasteries.style.display = 'block';
-    assembleChampionMastery(CHAMPION_MASTERY, MASTERIES_START_INDEX, MASTERIES_END_INDEX);
-    setTimeout(() => displayChampionMastery(), 700);
-});
-
-function displayChampionMastery() {
-    loadingSummonerInfo.style.display = 'none';
-    championMastery.style.display = 'block';
-    arrayChampionMastery.forEach(mastery => championMastery.insertAdjacentElement('beforeend', mastery));
-    arrayChampionMastery = [];
-    manageMoreMasteries();
-}
-
-function manageMoreMasteries() {
-    championMastery.insertAdjacentElement('beforeend', moreMasteries);
-    moreMasteries.style.display = 'grid';
-    moreMasteries.classList.remove('more-masteries-loading');
-    loadingMoreMasteries.style.display = 'none';
-    if (MASTERIES_COUNT >= CHAMPION_MASTERY.length) {
-        moreMasteries.classList.add('no-more-masteries-display');
-        noMoreMasteries.style.display = 'block';
-        noMoreMasteries.innerHTML = `<span style="color: #9791c5; font-weight: 700">${SUMMONER_NAME}</span> doesn't have more masteries.`;
-    } else {
-        MASTERIES_START_INDEX += 5;
-        MASTERIES_END_INDEX += 5;
-        buttonLoadMoreMasteries.style.display = 'block';
-    }
-}
-
-// MATCH HISTORY
-let MATCH_HISTORY = [];
-let MATCHES_START_INDEX, MATCHES_END_INDEX, MATCHES_COUNT;
-const moreMatches = document.querySelector('.more-matches');
-const loadingMoreMatches = document.querySelector('.loading-more-matches');
-const buttonLoadMoreMatches = document.querySelector('.button-load-more-matches');
-const noMoreMatches = document.querySelector('.no-more-matches');
-
+// Fetching the match history data from the summoner that the user has inserted.
 async function fetchMatchHistory() {
     try {
         resetButtonsBackgroundColor();
@@ -557,10 +569,10 @@ async function fetchMatchHistory() {
             body: JSON.stringify({
                 accountId: ACCOUNT_ID
             })
-        }
-        const response = await fetch('/match-history', options);
-        const data = await response.json();
-        if (data[0] === 'Error') {
+        };
+        const matchHistoryResponse = await fetch('/match-history', options);
+        const matchHistoryData = await matchHistoryResponse.json();
+        if (matchHistoryData[0] === 'Error') {
             setTimeout(() => {
                 loadingSummonerInfo.style.display = 'none';
                 notifyError.style.display = 'block';
@@ -573,17 +585,15 @@ async function fetchMatchHistory() {
             }, 300);
             return;
         }
-        console.log(data);
-        MATCH_HISTORY = data.matches;
-        console.log('MATCH HISTORY:');
-        console.log(MATCH_HISTORY);
+        MATCH_HISTORY = matchHistoryData.matches;
         await fetchMatches(MATCHES_START_INDEX, MATCHES_END_INDEX);
     } catch (err) {
-        console.log('Error in function: fetchMatchHistory');
+        console.log('Error in function %cfetchMatchHistory', errorInFunction);
         console.error(err);
     }
 }
 
+// Fetching an amount of matches from the match history.
 async function fetchMatches(startIndex, endIndex) {
     try {
         let MATCHES_ID = [];
@@ -600,18 +610,18 @@ async function fetchMatches(startIndex, endIndex) {
                     matchId: MATCHES_ID[i]
                 })
             };
-            const response = await fetch('/match', options);
-            const data = await response.json();
-            console.log(data);
-            await getMatchesData(data);
+            const matchResponse = await fetch('/match', options);
+            const matchData = await matchResponse.json();
+            await getMatchesData(matchData);
         }
         displayMatches();
     } catch (err) {
-        console.log('Error in function: fetchMatches');
+        console.log('Error in function %cfetchMatches', errorInFunction);
         console.error(err);
     }
 }
 
+// Fetching the match's data and the summoner's data in the match.
 async function getMatchesData(data) {
     const players = data.participantIdentities;
     for (let i in players) {
@@ -623,11 +633,12 @@ async function getMatchesData(data) {
     }
 }
 
+// Creating a container for each match that has been fetched.
+// The data for each match will be displayed inside the container created.
+// Each container created will be stored in an array.
 function assembleMatches(matchData, playerData) {
-    
     console.log(matchData);
     console.log(playerData);
-
     const div = document.createElement('div');
     const divHeader = document.createElement('div');
     const divInfo = document.createElement('div');
@@ -669,17 +680,14 @@ function assembleMatches(matchData, playerData) {
                 teams.map(team => {
                     if (team.win === 'Win') {
                         if (matchDurationInSeconds < 270 && team.inhibitorKills == '0') {
-                            console.log('REMAKE');
                             div.style.backgroundImage = 'linear-gradient(to right, #8a8a8a, #8a8a8a, #a1a1a1)';
                             return;
                         }
                         const winnerTeam = team.teamId;
                         if (winnerTeam == playerResult) {
-                            console.log(`Winner team: ${winnerTeam} - Player team: ${playerResult}`);
                             div.style.backgroundImage = 'linear-gradient(to right, rgba(26, 160, 97, 0.4), rgba(26, 160, 97, 0.3), rgba(26, 160, 97, 0.2))';
                             summonerChampionImage.style.border = '3px solid rgba(26, 160, 97, 0.8)';
                         } else {
-                            console.log(`Winner team: ${winnerTeam} - Player team: ${playerResult}`);
                             div.style.backgroundImage = 'linear-gradient(to right, rgba(160, 26, 55, 0.4), rgba(160, 26, 55, 0.3), rgba(160, 26, 55, 0.2))';
                             summonerChampionImage.style.border = '3px solid rgba(160, 26, 55, 0.8)';
                         }
@@ -690,7 +698,7 @@ function assembleMatches(matchData, playerData) {
             getMatchOutcome(matchData.teams, playerData.teamId, matchData.gameDuration);
 
             // Getting map and game mode.
-            QUEUE_DATA.map(queue => {
+            QUEUES_DATA.map(queue => {
                 if (queue.queueId == matchData.queueId) {
                     let mapAndGameMode = document.createElement('p');
                     mapAndGameMode.className = 'match-map-gamemode';
@@ -802,10 +810,8 @@ function assembleMatches(matchData, playerData) {
                 const summonerKDA = document.createElement('p');
                 summonerScore.innerHTML = `${kills} <span class="match-info-span">/</span> ${deaths} <span class="match-info-span">/</span> ${assists}`;
                 let kda = ((kills + assists) / deaths).toFixed(1);
-                console.log(kda)
                 if (isNaN(kda)) kda = 0;
                 if (!isFinite(kda)) kda = kills + assists;
-                console.log(kda);
                 summonerKDA.innerHTML = `${kda} <span class="match-info-span">KDA</span>`;
                 summonerScoreAndKDA.appendChild(summonerScore);
                 summonerScoreAndKDA.appendChild(summonerKDA);
@@ -861,9 +867,7 @@ function assembleMatches(matchData, playerData) {
                     });
                 });
                 let killParticipation = Math.round((sumSummonerKillsAndAssists / summonerTeamTotalKills) * 100);
-                console.log(killParticipation);
                 if (isNaN(killParticipation)) killParticipation = 0;
-                console.log(killParticipation);
                 summonerKillParticipation.innerHTML = `<strong>${killParticipation}%</strong> <span class="match-info-span">KP</span>`;
                 summonerLevelCSAndKP.appendChild(summonerKillParticipation);
             };
@@ -966,6 +970,7 @@ function assembleMatches(matchData, playerData) {
     arrayMatches.push({content: div, timestamp: MATCH_TIMESTAMP});
 }
 
+// Whenever the user clicks in the button \/ in a match container, it'll show the remaining data of that specific match.
 window.addEventListener('click', event => {
     const element = event.target;
     if (element.classList == 'button-expand-info') {
@@ -998,29 +1003,7 @@ window.addEventListener('click', event => {
     }
 });
 
-function resetMatchHistory() {
-    const matches = document.querySelectorAll('.match');
-    const arrayMatches = [...matches];
-    arrayMatches.forEach(match => match.remove());
-    MATCH_HISTORY = [];
-    MATCHES_START_INDEX = 0;
-    MATCHES_END_INDEX = 5;
-    MATCHES_COUNT = 0;
-    moreMatches.style.display = 'none';
-    buttonLoadMoreMatches.style.display = 'none';
-    loadingMoreMatches.style.display = 'none';
-    noMoreMatches.style.display = 'none';
-    moreMatches.classList.remove('more-matches-loading');
-    moreMatches.classList.remove('no-more-matches-display');
-}
-
-buttonLoadMoreMatches.addEventListener('click', () => {
-    buttonLoadMoreMatches.style.display = 'none';
-    moreMatches.classList.add('more-matches-loading');
-    loadingMoreMatches.style.display = 'block';
-    fetchMatches(MATCHES_START_INDEX, MATCHES_END_INDEX);
-});
-
+// After the matches have been created and stored in the array, display all of them in the document in chronological order.
 function displayMatches() {
     loadingSummonerInfo.style.display = 'none';
     matchHistory.style.display = 'block';
@@ -1030,6 +1013,15 @@ function displayMatches() {
     manageMoreMatches();
 }
 
+// Fetching and displaying more matches.
+buttonLoadMoreMatches.addEventListener('click', () => {
+    buttonLoadMoreMatches.style.display = 'none';
+    moreMatches.classList.add('more-matches-loading');
+    loadingMoreMatches.style.display = 'block';
+    fetchMatches(MATCHES_START_INDEX, MATCHES_END_INDEX);
+});
+
+// Displaying the button 'Show more' while there are still matches in the MATCH_HISTORY variable.
 function manageMoreMatches() {
     matchHistory.insertAdjacentElement('beforeend', moreMatches);
     moreMatches.style.display = 'grid';
@@ -1046,22 +1038,23 @@ function manageMoreMatches() {
     }
 }
 
-function returnToSearchSummoner() {
-    inputSearchSummoner.value = '';
-    searchSummoner.style.display = 'grid';
-    overviewSummoner.style.display = 'none';
-    summonerInfo.style.display = 'none';
-    ranked.style.display = 'none';
-    championMastery.style.display = 'none';
-    matchHistory.style.display = 'none';
-    resetButtonsBackgroundColor();
-    buttonSearchSummoner.disabled = true;
-    buttonSearchSummoner.classList.remove('button-search-summoner-enabled');
+function resetMatchHistory() {
+    const matches = document.querySelectorAll('.match');
+    const arrayMatches = [...matches];
+    arrayMatches.forEach(match => match.remove());
+    MATCH_HISTORY = [];
+    MATCHES_START_INDEX = 0;
+    MATCHES_END_INDEX = 5;
+    MATCHES_COUNT = 0;
+    moreMatches.style.display = 'none';
+    buttonLoadMoreMatches.style.display = 'none';
+    loadingMoreMatches.style.display = 'none';
+    noMoreMatches.style.display = 'none';
+    moreMatches.classList.remove('more-matches-loading');
+    moreMatches.classList.remove('no-more-matches-display');
 }
 
-const buttonScrollToTop = document.querySelector('.button-scroll-to-top');
-const scrollToTopImage = document.querySelector('.scroll-to-top-image');
-
+// Hide and display the 'scroll to the top button' based on how much the user has scrolled down.
 window.addEventListener('scroll', () => {
     const scroll = window.scrollY;
     if (scroll > 500) {

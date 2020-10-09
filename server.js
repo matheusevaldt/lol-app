@@ -27,7 +27,7 @@ app.post('/', async (request, response) => {
         }
         response.json(summonerData);
     } catch (err) {
-        console.log(`This is the error: ${err.message}`);
+        console.log(err.message);
         response.json(['Error', err.message]);
     }
 });
