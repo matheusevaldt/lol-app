@@ -321,6 +321,16 @@ header h2 {
     margin-top: 2px;
 }
 
+.small-circle {
+    border: 2px solid #d4d4d4;
+    border-radius: 50%;
+    height: 2px;
+    width: 2px;
+    display: inline-block;
+    position: relative;
+    top: -3.5px;
+}
+
 .champion-mastery { /* Styling the champion mastery section */
     display: none;
     margin-top: 15px;
@@ -495,11 +505,6 @@ header h2 {
     display: flex;
     align-items: center;
     color: var(--white-medium-opacity);
-}
-
-.match-duration {
-    position: relative;
-    top: 1px;
 }
 
 .match-info {

@@ -297,7 +297,7 @@ async function displayRanked(data) {
             if (rankedSoloFixed === 'Master' || rankedSoloFixed === 'Grandmaster' || rankedSoloFixed === 'Challenger') rankedSoloDivision = '';
             rankedSoloElo.innerHTML = `
             <strong style="font-size: 0.9em">${rankedSoloFixed} ${rankedSoloDivision}</strong> 
-            <span style="color: #d4d4d4; padding: 0 2px">&#128900;</span> 
+            <span class="small-circle" style="margin: 0 2px"></span> 
             <span style="color: rgba(255, 255, 255, 0.6); font-size: 0.85em">Ranked Solo</span>
             `;
             let RANKED_SOLO_WIN_RATE_COLOR;
@@ -308,8 +308,8 @@ async function displayRanked(data) {
                 return winRate;
             };
             rankedSoloLeaguePointsWinRate.innerHTML = `
-            ${queue.leaguePoints} LP <span style="color: #d4d4d4; padding: 0 3px">&#128900;</span> 
-            <span style="color: #a289b6"> ${queue.wins} W – ${queue.losses} L</span> <span style="color: #d4d4d4; padding: 0 3px">&#128900;</span> 
+            ${queue.leaguePoints} LP <span class="small-circle" style="margin: 0 3px"></span> 
+            <span style="color: #a289b6"> ${queue.wins} W – ${queue.losses} L</span> <span class="small-circle" style="margin: 0 3px"></span> 
             <span style="color: ${RANKED_SOLO_WIN_RATE_COLOR}">${getRankedSoloWinRate()}%</span>
             `;
             getRankedEmblem(queue.tier, rankedSoloEmblem);
@@ -323,7 +323,7 @@ async function displayRanked(data) {
             if (rankedFlexFixed === 'Master' || rankedFlexFixed === 'Grandmaster' || rankedFlexFixed === 'Challenger') rankedFlexDivision = '';
             rankedFlexElo.innerHTML = `
             <strong style="font-size: 0.9em">${rankedFlexFixed} ${rankedFlexDivision}</strong> 
-            <span style="color: #d4d4d4; padding: 0 2px">&#128900;</span> 
+            <span class="small-circle" style="border-color: #d4d4d4; margin: 0 2px"></span> 
             <span style="color: rgba(255, 255, 255, 0.6); font-size: 0.85em">Ranked Flex</span>
             `;
             let RANKED_FLEX_WIN_RATE_COLOR;
@@ -334,8 +334,8 @@ async function displayRanked(data) {
                 return winRate;
             };
             rankedFlexLeaguePointsWinRate.innerHTML = `
-            ${queue.leaguePoints} LP <span style="color: #d4d4d4; padding: 0 3px">&#128900;</span> 
-            <span style="color: #a289b6"> ${queue.wins} W – ${queue.losses} L</span> <span style="color: #d4d4d4; padding: 0 3px">&#128900;</span> 
+            ${queue.leaguePoints} LP <span class="small-circle" style="margin: 0 3px"></span> 
+            <span style="color: #a289b6"> ${queue.wins} W – ${queue.losses} L</span> <span class="small-circle" style="margin: 0 3px"></span> 
             <span style="color: ${RANKED_FLEX_WIN_RATE_COLOR}">${getRankedFlexWinRate()}%</span>
             `;
             getRankedEmblem(queue.tier, rankedFlexEmblem);
@@ -579,8 +579,8 @@ async function fetchMatchHistory() {
                 errorDescription.innerHTML = `
                 We were unable to fetch and display the information that you've requested. <br> <br>
                 <span style="font-weight: 700">This might be because:</span> <br>
-                <span style="padding-right: 2px">&#128900;</span> Summoner hasn't played any matches <br>
-                <span style="padding-right: 2px">&#128900;</span> Summoner is in a long period of inactivity
+                <span class="small-circle" style="margin-right: 2px"></span> Summoner hasn't played any matches <br>
+                <span class="small-circle" style="margin-right: 2px"></span> Summoner is in a long period of inactivity
                 `;
             }, 300);
             return;
@@ -706,7 +706,7 @@ function assembleMatches(matchData, playerData) {
                     const wordsToBeRemoved = ['5v5', 'games'];
                     let gameModeFixed = rawGameMode;
                     wordsToBeRemoved.map(word => gameModeFixed = gameModeFixed.replace(word, ''));
-                    mapAndGameMode.innerHTML = `${queue.map} <span style="padding: 0 3px">&#128900;</span> <strong>${gameModeFixed}</strong>`;
+                    mapAndGameMode.innerHTML = `${queue.map} <span class="small-circle" style="margin: 0 3px"></span> <strong>${gameModeFixed}</strong>`;
                     divHeader.appendChild(mapAndGameMode);           
                 }
             });
@@ -729,7 +729,7 @@ function assembleMatches(matchData, playerData) {
                 const interval = intervals.find(interval => interval.seconds < differenceInSeconds);
                 const number = Math.floor(differenceInSeconds / interval.seconds);
                 let labelGrammar = number !== 1 ? 's' : '';
-                matchDate.innerHTML = `${number} ${interval.label}${labelGrammar} ago<span style="padding: 0 4px">&#128900;</span>`;
+                matchDate.innerHTML = `${number} ${interval.label}${labelGrammar} ago <span class="small-circle" style="margin: 0 4.5px 0 3.5px"></span>`;
                 matchDateAndDuration.appendChild(matchDate);
             };
 
