@@ -21,7 +21,7 @@
 
 :root {
     --main-purple-color: #5d54a4;
-    --loading-border: 4px solid rgba(37, 28, 119, 0.3);
+    --loading-border: 4px solid rgba(37, 28, 119, 0.4);
     --loading-border-top: 4px solid rgba(37, 28, 119, 1);
     --white-medium-opacity: rgba(255, 255, 255, 0.6);
     --white-low-opacity: rgba(255, 255, 255, 0.4);
@@ -255,6 +255,19 @@ header h2 {
     width: 28px;
     height: 28px;
     animation: loading-spinner 1.2s linear infinite;
+}
+
+.guide-user {
+    display: none;
+    position: absolute;
+    top: 70px;
+    width: 90%;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    text-align: center;
+    font-size: 0.9em;
+    color: var(--white-medium-opacity);
 }
 
 .buttons {

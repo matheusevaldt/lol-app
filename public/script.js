@@ -5,6 +5,7 @@ const inputSearchSummoner = document.querySelector('.input-search-summoner');
 const buttonSearchSummoner = document.querySelector('.button-search-summoner');
 const summonerRegion = document.querySelector('.summoner-region');
 const loadingSearchSummoner = document.querySelector('.loading-search-summoner');
+const guideUser = document.querySelector('.guide-user');
 const buttonReturnToSearchSummoner = document.querySelector('.button-return-to-search-summoner');
 const summonerInfo = document.querySelector('.summoner-info');
 const loadingSummonerInfo = document.querySelector('.loading-summoner-info');
@@ -163,6 +164,7 @@ async function displaySummonerOverview(data, server) {
     overviewSummoner.style.display = 'block';
     summonerInfo.style.display = 'block';
     buttons.style.display = 'grid';
+    guideUser.style.display = 'block';
     const overviewIcon = document.querySelector('.overview-icon');
     const overviewLevel = document.querySelector('.overview-level');
     const overviewName = document.querySelector('.overview-name');
@@ -231,6 +233,7 @@ function resetSummonerInfo() {
     ranked.style.display = 'none';
     championMastery.style.display = 'none';
     matchHistory.style.display = 'none';
+    guideUser.style.display = 'none';
     notifyError.style.display = 'none';
     errorDescription.innerHTML = '';
 }
