@@ -52,16 +52,25 @@ app.post('/champion-mastery', async (request, response) => {
         if (!masteryResponse.ok) throw new Error('Unable to fetch data from the Champion Mastery API');
         const masteryData = await masteryResponse.json();
         response.json(masteryData);
+        console.log(masteryURL)
     } catch (err) {
         console.log(`Error in CHAMPION MASTERY: ${err.message}`);
         response.json(['Error', err.message]);
     }
 });
 
+// MATCH HISTORY USED MATCH-V4 API, WHICH HAS BEEN DEPRECATED.
+// THIS PORTION OF THE APP NEEDS TO BE REDONE.
+
 app.post('/match-history', async (request, response) => {
     try {
-        const matchHistoryURL = `https://${REGION}.api.riotgames.com/lol/match/v4/matchlists/by-account/${request.body.accountId}?api_key=${LEAGUEOFLEGENDS_API_KEY}`;
+        console.log(request.body);
+        // below is the URL using match-v4:
+        // const matchHistoryURL = `https://${REGION}.api.riotgames.com/lol/match/v4/matchlists/by-account/${request.body.accountId}?api_key=${LEAGUEOFLEGENDS_API_KEY}`;
+        // below is the URL using match-v5:
+        const matchHistoryURL = `https://${REGION}.api.riotgames.com/lol/match/v5/matches/by-puuid/${request.body.puuId}/ids?start=0&count=5&api_key=${LEAGUEOFLEGENDS_API_KEY}`;
         const matchHistoryResponse = await fetch(matchHistoryURL);
+        console.log(matchHistoryURL);
         const matchHistoryData = await matchHistoryResponse.json();
         if (!matchHistoryResponse.ok) throw new Error('Unable to fetch data from the Match History API');
         response.json(matchHistoryData);

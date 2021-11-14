@@ -36,6 +36,7 @@ const notifyError = document.querySelector('.notify-error');
 const errorDescription = document.querySelector('.error-description');
 const buttonScrollToTop = document.querySelector('.button-scroll-to-top');
 const scrollToTopImage = document.querySelector('.scroll-to-top-image');
+let PUU_ID;
 let ACCOUNT_ID;
 let SUMMONER_ID;
 let SUMMONER_NAME;
@@ -122,6 +123,7 @@ async function fetchSummonerData() {
         };
         const summonerResponse = await fetch('/', options);
         const summonerData = await summonerResponse.json();
+        console.log(summonerData);
         if (summonerData[0] === 'Error') {
             setTimeout(() => {
                 loadingSearchSummoner.style.display = 'none';
@@ -141,6 +143,7 @@ async function fetchSummonerData() {
             }, 300);
             return;
         }
+        PUU_ID = summonerData.puuid;
         ACCOUNT_ID = summonerData.accountId;
         SUMMONER_ID = summonerData.id;
         SUMMONER_NAME = summonerData.name;
@@ -288,6 +291,7 @@ async function fetchRankedData() {
 
 // Displaying the ranked data in the document.
 async function displayRanked(data) {
+    console.log('DISPLAY RANKED')
     loadingSummonerInfo.style.display = 'none';
     ranked.style.display = 'flex';
     data.map(queue => {
@@ -505,6 +509,7 @@ function getMasteryFlair(id, where) {
 
 // After the containers have been created and stored in the array, display all of them in the document.
 function displayChampionMastery() {
+    console.log('DISPLAY MASTERIES');
     loadingSummonerInfo.style.display = 'none';
     championMastery.style.display = 'block';
     arrayChampionMastery.forEach(mastery => championMastery.insertAdjacentElement('beforeend', mastery));
@@ -558,6 +563,7 @@ function resetChampionMastery() {
 // Fetching the match history data from the summoner that the user has inserted.
 async function fetchMatchHistory() {
     try {
+        console.log(PUU_ID);
         resetButtonsBackgroundColor();
         resetSummonerInfo();
         resetMatchHistory();
@@ -570,7 +576,8 @@ async function fetchMatchHistory() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                accountId: ACCOUNT_ID
+                // accountId: ACCOUNT_ID - USING MATCH-V4
+                puuId: PUU_ID // USING MATCH-V5
             })
         };
         const matchHistoryResponse = await fetch('/match-history', options);
@@ -581,13 +588,15 @@ async function fetchMatchHistory() {
                 notifyError.style.display = 'block';
                 errorDescription.innerHTML = `
                 We were unable to fetch and display the information that you've requested. <br> <br>
-                <span style="font-weight: 700">This might be because:</span> <br>
-                <span class="small-circle" style="margin-right: 2px"></span> Summoner hasn't played any matches <br>
-                <span class="small-circle" style="margin-right: 2px"></span> Summoner is in a long period of inactivity
+                <span style="font-weight: 700">Reasons as to why I am seeing this message: </span> <br>
+                <span class="small-circle" style="margin-right: 2px"></span> Summoner hasn't played any matches; <br> 
+                <span class="small-circle" style="margin-right: 2px"></span> Summoner is in a long period of inactivity; <br>
+                <span class="small-circle" style="margin-right: 2px"></span> API status is currently unavailable.
                 `;
             }, 300);
             return;
         }
+        // console.log(matchHistoryData);
         MATCH_HISTORY = matchHistoryData.matches;
         await fetchMatches(MATCHES_START_INDEX, MATCHES_END_INDEX);
     } catch (err) {
